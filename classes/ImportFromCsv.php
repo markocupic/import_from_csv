@@ -9,12 +9,10 @@
  * @author Marko Cupic <m.cupic@gmx.ch>
  */
 
-
 /**
  * Run in a custom namespace, so the class can be replaced
  */
 namespace MCupic;
-
 
 /**
  * Class ImportFromCsv
@@ -25,8 +23,8 @@ namespace MCupic;
  */
 class ImportFromCsv extends \Backend
 {
-            
-	/**
+
+       /**
         * array
         * import options
         */
@@ -39,77 +37,83 @@ class ImportFromCsv extends \Backend
         * @param string
         * @param string
         * @param string
-	 * @param string
+        * @param string
         */
        public static function importCsv($objCsvFile, $strTable, $strImportMode, $arrSelectedFields = null, $strFieldseparator = ';', $strFieldenclosure = '', $strPrimaryKey = 'id')
        {
               // store the options in self::$arrData
-		self::$arrData = array(
-			'tablename' 		=> $strTable,
-			'primaryKey' 		=> $strPrimaryKey,
-			'importMode' 		=> $strImportMode,
-			'selectedFields' 	=> is_array($arrSelectedFields) ? $arrSelectedFields : array(),
-			'fieldSeparator' 	=> $strFieldseparator,
-			'fieldEnclosure' 	=> $strFieldenclosure,
-		);
-		
+              self::$arrData = array(
+                     'tablename' => $strTable,
+                     'primaryKey' => $strPrimaryKey,
+                     'importMode' => $strImportMode,
+                     'selectedFields' => is_array($arrSelectedFields) ? $arrSelectedFields : array(),
+                     'fieldSeparator' => $strFieldseparator,
+                     'fieldEnclosure' => $strFieldenclosure,
+              );
+
               // truncate table
-              if (self::$arrData['importMode'] == 'truncate_table') {
+              if (self::$arrData['importMode'] == 'truncate_table')
+              {
                      \Database::getInstance()->execute('TRUNCATE TABLE `' . $strTable . '`');
               }
               if (count(self::$arrData['selectedFields']) < 1)
                      return;
-              
-		// create a tmp file
+
+              // create a tmp file
               $tmpFile = new \File('system/tmp/' . md5(time()) . '.csv');
               $tmpFile->truncate();
-		
-		// format file for correct handling
+
+              // format file for correct handling
               $tmpFile->write(self::formatFile($objCsvFile));
               $tmpFile->close();
-		
-		//get content as array
+
+              //get content as array
               $arrFileContent = $tmpFile->getContentAsArray();
               $arrFieldnames = explode(self::$arrData['fieldSeparator'], $arrFileContent[0]);
-              
-		// trim quotes in the first line and get the fieldnames
-              $arrFieldnames = array_map(function ($strFieldname) {
+
+              // trim quotes in the first line and get the fieldnames
+              $arrFieldnames = array_map(function ($strFieldname)
+              {
                      return trim($strFieldname, ImportFromCsv::$arrData['fieldEnclosure']);
               }, $arrFieldnames);
-		
-		// store each line as an entry in the db
-              foreach ($arrFileContent as $line => $lineContent) {
-                     
+
+              // store each line as an entry in the db
+              foreach ($arrFileContent as $line => $lineContent)
+              {
+
                      // line 0 contains the fieldnames
-			if ($line == 0)
-				continue;
-			
+                     if ($line == 0)
+                            continue;
+
                      // separate the line into the different fields	
                      $arrLine = explode(self::$arrData['fieldSeparator'], $lineContent);
-                     
-			// trim quotes
-                     $arrLine = array_map(function ($fieldContent) {
+
+                     // trim quotes
+                     $arrLine = array_map(function ($fieldContent)
+                     {
                             return trim($fieldContent, ImportFromCsv::$arrData['fieldEnclosure']);
                      }, $arrLine);
-			
+
                      $set = array();
-                     foreach ($arrFieldnames as $k => $fieldname) {
+                     foreach ($arrFieldnames as $k => $fieldname)
+                     {
+
                             // continue if field is excluded from import
                             if (!in_array($fieldname, self::$arrData['selectedFields']))
-					continue;
-                            
-				// if entries are appended autoincrement id
+                                   continue;
+
+                            // if entries are appended autoincrement id
                             if (self::$arrData['importMode'] == 'append_entries' && strtolower($fieldname) == self::$arrData['primaryKey'])
-					continue;
-                            
-				$fieldContent = $arrLine[$k];
-				// reinsert the newlines
+                                   continue;
+
+                            $fieldContent = $arrLine[$k];
+                            // reinsert the newlines
                             $fieldContent = str_replace('[NEWLINE-N]', chr(10), $fieldContent);
                             $fieldContent = str_replace('[DOUBLE-QUOTE]', '"', $fieldContent);
                             $set[$fieldname] = $fieldContent;
                      }
-                     
-                     // insert into database
+
+                     // insert entry into database
                      \Database::getInstance()->prepare('INSERT INTO `' . $strTable . '` %s')->set($set)->executeUncached();
               }
               $tmpFile->delete();
