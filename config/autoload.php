@@ -8,8 +8,16 @@
  * @package Import_from_csv
  * @link    https://contao.org
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
- * @author Marko Cupic m.cupic@gmx.ch
  */
+
+
+/**
+ * Register the namespaces
+ */
+ClassLoader::addNamespaces(array
+(
+	'MCupic',
+));
 
 
 /**
@@ -18,5 +26,5 @@
 ClassLoader::addClasses(array
 (
 	// Classes
-	'ImportFromCsv' => 'system/modules/import_from_csv/classes/ImportFromCsv.php',
+	'MCupic\ImportFromCsv' => 'system/modules/import_from_csv/classes/ImportFromCsv.php',
 ));

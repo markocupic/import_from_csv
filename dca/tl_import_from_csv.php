@@ -69,7 +69,10 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
               (
                      'sql' => "int(10) unsigned NOT NULL auto_increment",
               ),
-              'tstamp' => array('sql' => "int(10) unsigned NOT NULL default '0'"),
+              'tstamp' => array
+		(
+			'sql' => "int(10) unsigned NOT NULL default '0'"
+		),
               'import_table' => array
               (
                      'label' => &$GLOBALS['TL_LANG']['tl_import_from_csv']['import_table'],
@@ -79,7 +82,6 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
                             'optionsCbGetTables'
                      ),
                      'eval' => array(
-                            'doNotShow' => true,
                             'multiple' => false,
                             'mandatory' => true,
                             'includeBlankOption' => true,
@@ -93,7 +95,6 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
                      'inputType' => 'text',
                      'default' => ';',
                      'eval' => array(
-                            'doNotShow' => true,
                             'mandatory' => true,
                      ),
                      'sql' => "varchar(255) NOT NULL default ''"
@@ -103,7 +104,6 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
                      'label' => &$GLOBALS['TL_LANG']['tl_import_from_csv']['field_enclosure'],
                      'inputType' => 'text',
                      'eval' => array(
-                            'doNotShow' => true,
                             'mandatory' => false,
                      ),
                      'sql' => "varchar(255) NOT NULL default ''"
@@ -115,7 +115,6 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
                      'options' => array('append_entries', 'truncate_table'),
                      'reference' => $GLOBALS['TL_LANG']['tl_import_from_csv'],
                      'eval' => array(
-                            'doNotShow' => true,
                             'multiple' => false,
                             'mandatory' => true,
                      ),
@@ -130,7 +129,6 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
                             'optionsCbSelectedFields'
                      ),
                      'eval' => array(
-                            'doNotShow' => true,
                             'multiple' => true,
                      ),
                      'sql' => "varchar(1024) NOT NULL default ''"
@@ -140,7 +138,6 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
                      'label' => &$GLOBALS['TL_LANG']['tl_import_from_csv']['fileSRC'],
                      'inputType' => 'fileTree',
                      'eval' => array(
-                            'doNotShow' => true,
                             'multiple' => false,
                             'fieldType' => 'radio',
                             'files' => true,
@@ -165,11 +162,30 @@ class tl_import_from_csv extends Backend
        public function __construct()
        {
               parent::__construct();
-              if (Input::post('FORM_SUBMIT')) {
-                     ImportFromCsv::initImport();
+              if (Input::post('FORM_SUBMIT') && Input::post('SUBMIT_TYPE') != 'auto') {
+                     $this->initImport();
               }
        }
-
+	/**
+        * init the import
+        */
+       private function initImport()
+       {
+             
+              $strTable = Input::post('import_table');
+              $importMode = Input::post('import_mode');
+              $arrSelectedFields = Input::post('selected_fields');
+              $strFieldseparator = Input::post('field_separator');
+              $strFieldenclosure = Input::post('field_enclosure');
+		$objFile = FilesModel::findByPk(Input::post('fileSRC'));
+		
+		// call the import class if file exists
+              if (null !== $objFile) {
+                     if (is_file(TL_ROOT . '/' . $objFile->path) && strtolower($objFile->extension) == 'csv') {
+                           MCupic\ImportFromCsv::importCsv($objFile, $strTable, $importMode, $arrSelectedFields, $strFieldseparator, $strFieldenclosure, 'id');
+                     }
+              }
+       }
        public function optionsCbGetTables()
        {
               $objTables = Database::getInstance()->listTables();
