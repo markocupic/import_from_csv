@@ -60,7 +60,7 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
        // Palettes
        'palettes' => array
        (
-              'default' => '{import_from_csv},import_table,selected_fields,field_separator,field_enclosure,import_mode,fileSRC',
+              'default' => 'import_table,selected_fields,field_separator,field_enclosure,import_mode,fileSRC',
        ),
        // Fields
        'fields' => array
