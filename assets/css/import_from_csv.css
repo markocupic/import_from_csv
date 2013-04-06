@@ -1,0 +1,11 @@
+a.header_new
+{
+       padding:30px;
+       background-image: url(/../system/modules/import_from_csv/assets/images/file-import-icon-72.png);
+}
+
+#tl_buttons
+{
+       height: 60px;
+       margin-top:20px;
+}
