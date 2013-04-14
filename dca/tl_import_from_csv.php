@@ -1,4 +1,6 @@
 <?php
+if (!defined('TL_ROOT'))
+       die('You can not access this file directly!');
 /**
  * Contao Open Source CMS
  * Copyright (c) 2005-2013 Leo Feyer
@@ -13,11 +15,6 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
        // Config
        'config' => array
        (
-              'sql' => array(
-                     'keys' => array(
-                            'id' => 'primary',
-                     )
-              ),
               'dataContainer' => 'Table',
        ),
        // List
@@ -65,14 +62,7 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
        // Fields
        'fields' => array
        (
-              'id' => array
-              (
-                     'sql' => "int(10) unsigned NOT NULL auto_increment",
-              ),
-              'tstamp' => array
-		(
-			'sql' => "int(10) unsigned NOT NULL default '0'"
-		),
+             
               'import_table' => array
               (
                      'label' => &$GLOBALS['TL_LANG']['tl_import_from_csv']['import_table'],
@@ -87,7 +77,6 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
                             'includeBlankOption' => true,
                             'submitOnChange' => true,
                      ),
-                     'sql' => "varchar(255) NOT NULL default ''"
               ),
               'field_separator' => array
               (
@@ -97,7 +86,6 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
                      'eval' => array(
                             'mandatory' => true,
                      ),
-                     'sql' => "varchar(255) NOT NULL default ''"
               ),
               'field_enclosure' => array
               (
@@ -106,7 +94,6 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
                      'eval' => array(
                             'mandatory' => false,
                      ),
-                     'sql' => "varchar(255) NOT NULL default ''"
               ),
               'import_mode' => array
               (
@@ -118,7 +105,6 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
                             'multiple' => false,
                             'mandatory' => true,
                      ),
-                     'sql' => "varchar(255) NOT NULL default ''"
               ),
               'selected_fields' => array
               (
@@ -131,7 +117,6 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
                      'eval' => array(
                             'multiple' => true,
                      ),
-                     'sql' => "varchar(1024) NOT NULL default ''"
               ),
               'fileSRC' => array
               (
@@ -145,7 +130,6 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array
                             'extensions' => 'csv',
                             'submitOnChange' => true,
                      ),
-                     'sql' => "blob NULL"
               ),
        )
 );
@@ -162,7 +146,7 @@ class tl_import_from_csv extends Backend
        public function __construct()
        {
               parent::__construct();
-              if (Input::post('FORM_SUBMIT') && Input::post('SUBMIT_TYPE') != 'auto') {
+              if ($this->Input->post('FORM_SUBMIT') && $this->Input->post('SUBMIT_TYPE') != 'auto') {
                      $this->initImport();
               }
        }
@@ -172,23 +156,24 @@ class tl_import_from_csv extends Backend
        private function initImport()
        {
              
-              $strTable = Input::post('import_table');
-              $importMode = Input::post('import_mode');
-              $arrSelectedFields = Input::post('selected_fields');
-              $strFieldseparator = Input::post('field_separator');
-              $strFieldenclosure = Input::post('field_enclosure');
-		$objFile = FilesModel::findByPk(Input::post('fileSRC'));
+              $strTable = $this->Input->post('import_table');
+              $importMode = $this->Input->post('import_mode');
+              $arrSelectedFields = $this->Input->post('selected_fields');
+              $strFieldseparator = $this->Input->post('field_separator');
+              $strFieldenclosure = $this->Input->post('field_enclosure');
 		
 		// call the import class if file exists
-              if (null !== $objFile) {
-                     if (is_file(TL_ROOT . '/' . $objFile->path) && strtolower($objFile->extension) == 'csv') {
-                           MCupic\ImportFromCsv::importCsv($objFile, $strTable, $importMode, $arrSelectedFields, $strFieldseparator, $strFieldenclosure, 'id');
+              if (is_file(TL_ROOT . '/' . $this->Input->post('fileSRC'))) {
+			$objFile = new File($this->Input->post('fileSRC'));
+                     if (strtolower($objFile->extension) == 'csv') {
+				$objImport = new ImportFromCsv;
+                            $objImport->importCsv($objFile, $strTable, $importMode, $arrSelectedFields, $strFieldseparator, $strFieldenclosure, 'id');
                      }
               }
        }
        public function optionsCbGetTables()
        {
-              $objTables = Database::getInstance()->listTables();
+              $objTables = $this->Database->listTables();
               $arrOptions = array();
               foreach ($objTables as $table) {
                      $arrOptions[] = $table;
@@ -198,9 +183,9 @@ class tl_import_from_csv extends Backend
 
        public function optionsCbSelectedFields()
        {
-              $objDb = Database::getInstance()->prepare('SELECT * FROM tl_import_from_csv WHERE id = ?')->execute(Input::get('id'));
+              $objDb = $this->Database->prepare('SELECT * FROM tl_import_from_csv WHERE id = ?')->execute($this->Input->get('id'));
               if ($objDb->import_table == '') return;
-              $objFields = Database::getInstance()->listFields($objDb->import_table, 1);
+              $objFields = $this->Database->listFields($objDb->import_table, 1);
               $arrOptions = array();
               //die(print_r($objFields,true));
               foreach ($objFields as $field) {
