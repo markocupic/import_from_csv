@@ -1,11 +1,55 @@
-a.header_new
-{
-       padding:30px;
-       background-image: url(/../system/modules/import_from_csv/assets/images/file-import-icon-72.png);
+a.header_new {
+    padding: 30px;
+    background-image: url(/../system/modules/import_from_csv/assets/images/file-import-icon-72.png);
 }
 
-#tl_buttons
-{
-       height: 60px;
-       margin-top:20px;
+#tl_buttons {
+    height: 60px;
+    margin-top: 20px;
+}
+
+#tl_buttons {
+    height: 60px;
+    margin-top: 20px;
+}
+
+#save {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 25px;
+    background: 0;
+    background-color: #006699;
+    text-shadow: 0 0 #fff;
+}
+
+#reportTable {
+    width: 100%;
+}
+
+#reportTable td.tdTitle {
+    font-weight: bold;
+}
+
+#reportTable td {
+    border: 1px solid #ccc;
+    padding: 4px;
+    font-size: 10px;
+}
+
+#reportTable .allOk td {
+    color: #008000;
+}
+
+#reportTable .error td {
+    color: red;
+}
+#reportTable .error td .errMsg {
+    font-weight: bold;
+}
+
+#reportTable .delim td {
+    border-left-width: 0;
+    border-right-width: 0;
 }
