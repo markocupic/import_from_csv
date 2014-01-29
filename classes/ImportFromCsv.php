@@ -28,15 +28,15 @@ class ImportFromCsv extends \Backend
         */
        public $arrData;
 
-
        /**
-        * @param object
-        * @param string
-        * @param string
-        * @param string
-        * @param string
-        * @param string
-        * @param string
+        * @param $objCsvFile
+        * @param $strTable
+        * @param $strImportMode
+        * @param null $arrSelectedFields
+        * @param string $strFieldseparator
+        * @param string $strFieldenclosure
+        * @param string $strPrimaryKey
+        * @param string $arrDelim
         */
        public function importCsv($objCsvFile, $strTable, $strImportMode, $arrSelectedFields = null, $strFieldseparator = ';', $strFieldenclosure = '', $strPrimaryKey = 'id', $arrDelim = '||')
        {
@@ -48,7 +48,6 @@ class ImportFromCsv extends \Backend
               \System::loadLanguageFile('tl_member');
               $this->loadDataContainer('tl_member');
 
-
               // store the options in $this->arrData
               $this->arrData = array(
                      'tablename' => $strTable,
@@ -58,11 +57,13 @@ class ImportFromCsv extends \Backend
                      'fieldSeparator' => $strFieldseparator,
                      'fieldEnclosure' => $strFieldenclosure,
               );
+
               // truncate table
               if ($this->arrData['importMode'] == 'truncate_table')
               {
                      $this->Database->execute('TRUNCATE TABLE `' . $strTable . '`');
               }
+
               if (count($this->arrData['selectedFields']) < 1)
               {
                      return;
@@ -207,7 +208,7 @@ class ImportFromCsv extends \Backend
 
                      }
 
-
+                     // insert data record
                      if (!$doNotSave)
                      {
                             if ($this->Database->fieldExists('tstamp', $strTable) && !$set['tstamp'])
