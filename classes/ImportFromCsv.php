@@ -28,6 +28,7 @@ class ImportFromCsv extends \Backend
         */
        public $arrData;
 
+
        /**
         * @param $objCsvFile
         * @param $strTable
@@ -128,8 +129,9 @@ class ImportFromCsv extends \Backend
                             // get the DCA of the current field
                             $arrDCA =  & $GLOBALS['TL_DCA'][$strTable]['fields'][$fieldname];
 
-                            // Prepare FormWidget object
-                            $inputType = $arrDCA['inputType'];
+                            // Prepare FormWidget object !set inputType to "text" if there is no definition
+                            $inputType = $arrDCA['inputType'] != '' ? $arrDCA['inputType'] : 'text';
+
                             // Map checkboxWizards to regular checkbox widgets
                             if ($inputType == 'checkboxWizard')
                             {
@@ -171,7 +173,8 @@ class ImportFromCsv extends \Backend
                                    {
                                           try
                                           {
-                                                 $objDate = new \Date($fieldContent);
+                                                 $strTimeFormat = $GLOBALS['TL_CONFIG'][$rgxp . 'Format'];
+                                                 $objDate = new \Date($fieldContent, $strTimeFormat);
                                                  $fieldContent = $objDate->tstamp;
                                           }
                                           catch (\OutOfBoundsException $e)
@@ -179,6 +182,7 @@ class ImportFromCsv extends \Backend
                                                  $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['invalidDate'], $fieldContent));
                                           }
                                    }
+
 
                                    // Make sure that unique fields are unique
                                    if ($arrDCA['eval']['unique'] && $fieldContent != '' && !$this->Database->isUniqueValue($strTable, $fieldname, $fieldContent, null))

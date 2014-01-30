@@ -17,14 +17,19 @@ if (!defined('TL_ROOT'))
  */
 if (TL_MODE == 'BE') {
        $GLOBALS['BE_MOD']['system']['import_from_csv'] = array(
-              'icon' => 'system/modules/import_from_csv/assets/images/file-import-icon-16.png',
+              'icon' => 'system/modules/import_from_csv/assets/file-import-icon-16.png',
               'tables' => array(
                      'tl_import_from_csv'
               )
        );
 }
 if (TL_MODE == 'BE' && $_GET['do'] == 'import_from_csv') {
-       $GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/import_from_csv/assets/js/import_from_csv.js';
-       $GLOBALS['TL_CSS'][] = 'system/modules/import_from_csv/assets/css/import_from_csv.css';
+       $GLOBALS['TL_JAVASCRIPT'][] = 'system/modules/import_from_csv/assets/import_from_csv.js';
+       $GLOBALS['TL_CSS'][] = 'system/modules/import_from_csv/assets/import_from_csv.css';
+
+       $GLOBALS['TL_HOOKS']['parseBackendTemplate'][] = array(
+              'tl_import_from_csv',
+              'parseBackendTemplate'
+       );
 }
 

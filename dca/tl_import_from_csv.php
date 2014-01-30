@@ -34,7 +34,9 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array(
                      'fields' => array('import_table'),
                      'format' => '%s'
               ),
-              'global_operations' => array( //
+              'global_operations' => array
+              (
+
               ),
               'operations' => array(
                      'edit' => array(
@@ -77,6 +79,7 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array(
                      ),
                      'eval' => array(
                             'tl_class' => 'clr',
+                            'doNotShow'=>true
                      )
 
               ),
@@ -88,6 +91,7 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array(
                      ),
                      'eval' => array(
                             'tl_class' => 'clr',
+                            'doNotShow' => true
                      )
 
               ),
@@ -183,8 +187,11 @@ class tl_import_from_csv extends Backend
        {
 
               parent::__construct();
-              if ($this->Input->post('FORM_SUBMIT') && $this->Input->post('SUBMIT_TYPE') != 'auto' && !$_SESSION['import_from_csv'])
+
+              // $_POST['saveNcreate'] is the import button
+              if ($_POST['saveNcreate'] && $this->Input->post('FORM_SUBMIT') && $this->Input->post('SUBMIT_TYPE') != 'auto' && !$_SESSION['import_from_csv'])
               {
+                     unset($_POST['saveNcreate']);
                      $this->initImport();
               }
        }
@@ -238,10 +245,10 @@ class tl_import_from_csv extends Backend
               return '
 <div class="manual">
     <label><h2>Erklärungen</h2></label>
-    <figure class="image_container"><img src="../system/modules/import_from_csv/assets/images/explanation.jpg" title="in ms excel" style="width:100%" alt="explanation"></figure>
+    <figure class="image_container"><img src="../system/modules/import_from_csv/assets/explanation.jpg" title="in ms excel" style="width:100%" alt="explanation"></figure>
     <p class="tl_help">CSV erstellt mit Tabellenkalkulationsprogramm (MS-Excel o.ä.)</p>
 <br>
-    <figure class="image_container"><img src="../system/modules/import_from_csv/assets/images/explanation2.jpg" title="texteditor" style="width:100%" alt="explanation"></figure>
+    <figure class="image_container"><img src="../system/modules/import_from_csv/assets/explanation2.jpg" title="texteditor" style="width:100%" alt="explanation"></figure>
     <p class="tl_help">CSV erstellt mit einfachem Texteditor</p>
 <br>
     <p class="tl_help">Legen Sie mit Excel oder einem Texteditor ihrer Wahl eine Kommaseparierte Textdatei an (csv). In die erste Zeile schreiben Sie die korrekten Feldnamen. Die einzelnen Felder sollten durch ein Trennzeichen, üblicherweise das Semikolon ";", abgegrenzt werden. Feldinhalt, der in der Datenbank als serialisiertes Array abgelegt wird (z.B. Gruppenzugehörigkeiten), muss durch zwei aufeinanderfolgende pipe-Zeichen abgegrenzt werden "||". Feldbegrenzer und Feldtrennzeichen können individuell festgelegt werden. Wichtig! Beginnen Sie jeden Datensatz mit einer neuen Zeile. Keine Zeilenumbrüche im Datensatz.<br>Laden Sie die erstellte csv-Datei auf den Server. Anschliessend starten Sie den Importvorgang mit einem Klick auf den grossen Button.</p>
@@ -319,6 +326,36 @@ class tl_import_from_csv extends Backend
                      $arrOptions[$field['name']] = $field['name'] . ' [' . $field['type'] . ']';
               }
               return $arrOptions;
+       }
+       /**
+        * Parse Backend Template Hook
+        * @param string
+        * @param string
+        * @return string
+        */
+       public function parseBackendTemplate($strContent, $strTemplate)
+       {
+
+              if (Input::get('act') == 'edit')
+              {
+                     // remove saveNClose button
+                     $strContent = preg_replace('/<input type=\"submit\" name=\"saveNclose\"((\r|\n|.)+?)>/', '', $strContent);
+
+                     //rename buttons
+                     $strContent = preg_replace('/<input type=\"submit\" name=\"save\" id=\"save\" class=\"tl_submit\" accesskey=\"s\" value=\"((\r|\n|.)+?)\">/', '<input type="submit" name="save" id="save" class="tl_submit" accesskey="s" value="' . $GLOBALS['TL_LANG']['MSC']['save'] . '">', $strContent);
+                     $strContent = preg_replace('/<input type=\"submit\" name=\"saveNcreate\" id=\"saveNcreate\" class=\"tl_submit\" accesskey=\"n\" value=\"((\r|\n|.)+?)\">/', '<input type="submit" name="saveNcreate" id="saveNcreate" class="tl_submit importButton" accesskey="n" value="' . $GLOBALS['TL_LANG']['tl_import_from_csv']['launchImportButton'] . '">', $strContent);
+
+
+                     if(strstr($strContent, 'reportTable'))
+                     {
+                            $strContent = preg_replace('/<input type=\"submit\" name=\"save\"((\r|\n|.)+?)>/', '', $strContent);
+                            $strContent = preg_replace('/<input type=\"submit\" name=\"saveNclose\"((\r|\n|.)+?)>/', '', $strContent);
+                            $strContent = preg_replace('/<input type=\"submit\" name=\"saveNcreate\"((\r|\n|.)+?)>/', '', $strContent);
+                     }
+
+              }
+
+              return $strContent;
        }
 }           
               

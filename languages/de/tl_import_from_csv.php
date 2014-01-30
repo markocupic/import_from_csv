@@ -23,3 +23,8 @@ $GLOBALS['TL_LANG']['tl_import_from_csv']['fileSRC'] = array('csv-Datei auswähl
 //references
 $GLOBALS['TL_LANG']['tl_import_from_csv']['truncate_table'] = array('Tabelle vor dem Import löschen');
 $GLOBALS['TL_LANG']['tl_import_from_csv']['append_entries'] = array('Datensätze nur anhängen');
+
+//buttons
+$GLOBALS['TL_LANG']['tl_import_from_csv']['new'][0] = 'Neuen Importdatensatz anlegen';
+$GLOBALS['TL_LANG']['tl_import_from_csv']['new'][1] = 'Einen neuen Importdatensatz anlegen';
+$GLOBALS['TL_LANG']['tl_import_from_csv']['launchImportButton'] = 'Importvorgang starten';
