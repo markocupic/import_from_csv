@@ -44,11 +44,13 @@ class ImportFromCsv extends \Backend
        public function importCsv($objCsvFile, $strTable, $strImportMode, $arrSelectedFields = null, $strFieldseparator = ';', $strFieldenclosure = '', $strPrimaryKey = 'id', $arrDelim = '||')
        {
 
-
+              // store sucess or failure message in the session
               $_SESSION['import_from_csv']['report'] = array();
 
-
+              // load language file
               \System::loadLanguageFile($strTable);
+
+              // load dca
               $this->loadDataContainer($strTable);
 
               // store the options in $this->arrData
@@ -71,18 +73,6 @@ class ImportFromCsv extends \Backend
               {
                      return;
               }
-
-              /**
-               * // create a tmp file
-               * $tmpFile = new \File('system/tmp/' . md5(time()) . '.csv');
-               * $tmpFile->truncate();
-               * // format file for correct handling
-               * $tmpFile->write($this->formatFile($objCsvFile));
-               * $tmpFile->close();
-               * //get content as array
-               * $arrFileContent = $tmpFile->getContentAsArray();
-               * $arrFieldnames = explode($this->arrData['fieldSeparator'], $arrFileContent[0]);
-               */
 
               //get content as array
               $arrFileContent = $objCsvFile->getContentAsArray();
@@ -107,7 +97,6 @@ class ImportFromCsv extends \Backend
                      // separate the line into the different fields
                      $arrLine = explode($this->arrData['fieldSeparator'], $lineContent);
 
-
                      $set = array();
                      foreach ($arrFieldnames as $k => $fieldname)
                      {
@@ -116,21 +105,18 @@ class ImportFromCsv extends \Backend
                             {
                                    continue;
                             }
+
                             // if entries are appended autoincrement id
                             if ($this->arrData['importMode'] == 'append_entries' && strtolower($fieldname) == $this->arrData['primaryKey'])
                             {
                                    continue;
                             }
 
+                            // get the field-content
                             $fieldContent = $arrLine[$k];
 
                             // trim quotes
                             $fieldContent = $this->myTrim($fieldContent);
-
-
-                            // reinsert the newlines
-                            $fieldContent = str_replace('[NEWLINE-N]', chr(10), $fieldContent);
-                            $fieldContent = str_replace('[DOUBLE-QUOTE]', '"', $fieldContent);
 
                             // get the DCA of the current field
                             $arrDCA =  & $GLOBALS['TL_DCA'][$strTable]['fields'][$fieldname];
@@ -146,6 +132,7 @@ class ImportFromCsv extends \Backend
                             $strClass = & $GLOBALS['TL_FFL'][$inputType];
 
                             // Continue if the class does not exist
+                            // Use form widgets for input validation
                             if (class_exists($strClass))
                             {
                                    $objWidget = new $strClass($strClass::getAttributesFromDca($arrDCA, $fieldname, $fieldContent, '', '', $this));
@@ -158,6 +145,7 @@ class ImportFromCsv extends \Backend
                                    {
                                           \Input::setPost('password_confirm', $fieldContent);
                                    }
+
                                    // add option values in the csv like this: value1||value2||value3
                                    if ($inputType == 'radio' || $inputType == 'checkbox' || $inputType == 'select')
                                    {
@@ -169,10 +157,12 @@ class ImportFromCsv extends \Backend
                                           }
                                    }
 
+                                   // validate input
                                    $objWidget->validate();
                                    $fieldContent = $objWidget->value;
 
                                    $rgxp = $arrDCA['eval']['rgxp'];
+
                                    // Convert date formats into timestamps (check the eval setting first -> #3063)
                                    if (($rgxp == 'date' || $rgxp == 'time' || $rgxp == 'datim') && $fieldContent != '')
                                    {
@@ -188,13 +178,11 @@ class ImportFromCsv extends \Backend
                                           }
                                    }
 
-
                                    // Make sure that unique fields are unique
                                    if ($arrDCA['eval']['unique'] && $fieldContent != '' && !$this->Database->isUniqueValue($strTable, $fieldname, $fieldContent, null))
                                    {
                                           $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['unique'], $arrDCA['label'][0] ? : $fieldname));
                                    }
-
 
                                    // Do not save the field if there are errors
                                    if ($objWidget->hasErrors())
@@ -211,7 +199,6 @@ class ImportFromCsv extends \Backend
                                           }
                                    }
                             }
-
 
                             $set[$fieldname] = $fieldContent;
 
@@ -268,26 +255,6 @@ class ImportFromCsv extends \Backend
                      $_SESSION['import_from_csv']['report'][] = $htmlReport;
 
               }
-              //$tmpFile->delete();
-       }
-
-
-       /**
-        * @param object
-        * @return string
-        */
-       private function formatFile($objFile)
-       {
-
-              $file = new \File($objFile->value);
-              $fileContent = $file->getContent();
-              $fileContent = str_replace('\"', '[DOUBLE-QUOTE]', $fileContent);
-              $fileContent = str_replace('\r\n', '[NEWLINE-RN]', $fileContent);
-              $fileContent = str_replace(chr(13) . chr(10), '[NEWLINE-RN]', $fileContent);
-              $fileContent = str_replace('\n', '[NEWLINE-N]', $fileContent);
-              $fileContent = str_replace(chr(10), '[NEWLINE-N]', $fileContent);
-              $fileContent = str_replace('[NEWLINE-RN]', chr(13) . chr(10), $fileContent);
-              return $fileContent;
        }
 
 
@@ -297,6 +264,7 @@ class ImportFromCsv extends \Backend
         */
        private function myTrim($strFieldname)
        {
+
               return trim($strFieldname, $this->arrData['fieldEnclosure']);
        }
 }
