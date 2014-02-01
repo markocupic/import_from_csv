@@ -1,13 +1,12 @@
 <?php
-
 /**
  * Contao Open Source CMS
  * Copyright (C) 2005-2012 Leo Feyer
  * @package import_from_csv
+ * @author Marko Cupic 2014, extension sponsered by Rainer-Maria Fritsch - Fast-Doc UG, Berlin
  * @link    http://www.contao.org
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
  */
-
 
 $GLOBALS['TL_DCA']['tl_import_from_csv'] = array(
        // Config
@@ -34,10 +33,7 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array(
                      'fields' => array('import_table'),
                      'format' => '%s'
               ),
-              'global_operations' => array
-              (
-
-              ),
+              'global_operations' => array(),
               'operations' => array(
                      'edit' => array(
                             'label' => &$GLOBALS['TL_LANG']['MSC']['edit'],
@@ -59,7 +55,7 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array(
        ),
        // Palettes
        'palettes' => array(
-              'default' => '{manual},explanation;{settings},import_table,selected_fields,field_separator,field_enclosure,import_mode,fileSRC',
+              'default' => '{manual},explanation;{settings},import_table,selected_fields,field_separator,field_enclosure,import_mode,fileSRC,listLines',
        ),
        // Fields
        'fields' => array(
@@ -79,7 +75,7 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array(
                      ),
                      'eval' => array(
                             'tl_class' => 'clr',
-                            'doNotShow'=>true
+                            'doNotShow' => true
                      )
 
               ),
@@ -169,6 +165,17 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array(
                             'submitOnChange' => true,
                      ),
                      'sql' => "blob NULL"
+              ),
+              'listLines' => array(
+                     'input_field_callback' => array(
+                            'tl_import_from_csv',
+                            'generateFileContent'
+                     ),
+                     'eval' => array(
+                            'tl_class' => 'clr',
+                            'doNotShow' => true
+                     )
+
               )
        )
 );
@@ -176,10 +183,11 @@ $GLOBALS['TL_DCA']['tl_import_from_csv'] = array(
 /**
  * Class tl_import_from_csv
  * Provide miscellaneous methods that are used by the data configuration array.
- * @copyright  Marko Cupic
- * @author     Marko Cupic
- * @package    tl_import_from_csv
+ * Copyright : &copy; 2014 Marko Cupic Sponsor der Erweiterung: Fast-Doc UG, Berlin
+ * @author Marko Cupic 2014, extension sponsered by Rainer-Maria Fritsch - Fast-Doc UG, Berlin
+ * @package import_from_csv
  */
+
 class tl_import_from_csv extends Backend
 {
 
@@ -202,6 +210,7 @@ class tl_import_from_csv extends Backend
         */
        public function setPalettes()
        {
+
               if ($_SESSION['import_from_csv'] && !$this->Input->post('FORM_SUBMIT'))
               {
                      $GLOBALS['TL_DCA']['tl_import_from_csv']['palettes']['default'] = 'report;';
@@ -245,10 +254,10 @@ class tl_import_from_csv extends Backend
               return '
 <div class="manual">
     <label><h2>Erklärungen</h2></label>
-    <figure class="image_container"><img src="../system/modules/import_from_csv/assets/explanation.jpg" title="in ms excel" style="width:100%" alt="explanation"></figure>
+    <figure class="image_container"><img src="../system/modules/import_from_csv/assets/manual.jpg" title="ms-excel" style="width:100%" alt="manual"></figure>
     <p class="tl_help">CSV erstellt mit Tabellenkalkulationsprogramm (MS-Excel o.ä.)</p>
 <br>
-    <figure class="image_container"><img src="../system/modules/import_from_csv/assets/explanation2.jpg" title="texteditor" style="width:100%" alt="explanation"></figure>
+    <figure class="image_container"><img src="../system/modules/import_from_csv/assets/manual2.jpg" title="text-editor" style="width:100%" alt="manual"></figure>
     <p class="tl_help">CSV erstellt mit einfachem Texteditor</p>
 <br>
     <p class="tl_help">Legen Sie mit Excel oder einem Texteditor ihrer Wahl eine Kommaseparierte Textdatei an (csv). In die erste Zeile schreiben Sie die korrekten Feldnamen. Die einzelnen Felder sollten durch ein Trennzeichen, üblicherweise das Semikolon ";", abgegrenzt werden. Feldinhalt, der in der Datenbank als serialisiertes Array abgelegt wird (z.B. Gruppenzugehörigkeiten), muss durch zwei aufeinanderfolgende pipe-Zeichen abgegrenzt werden "||". Feldbegrenzer und Feldtrennzeichen können individuell festgelegt werden. Wichtig! Beginnen Sie jeden Datensatz mit einer neuen Zeile. Keine Zeilenumbrüche im Datensatz.<br>Laden Sie die erstellte csv-Datei auf den Server. Anschliessend starten Sie den Importvorgang mit einem Klick auf den grossen Button.</p>
@@ -260,11 +269,51 @@ class tl_import_from_csv extends Backend
 
 
        /**
+        * field_callback generateExplanationMarkup
+        * @return string
+        */
+       public function generateFileContent()
+       {
+
+              $objDb = $this->Database->prepare('SELECT fileSRC FROM tl_import_from_csv WHERE id=?')->execute(Input::get('id'));
+              $objFile = FilesModel::findByUuid($objDb->fileSRC);
+              // call the import class if file exists
+              if (is_file(TL_ROOT . '/' . $objFile->path))
+              {
+
+              }
+              else
+              {
+                     return;
+              }
+              $objFile = new File($objFile->path, true);
+              $arrFileContent = $objFile->getContentAsArray();
+              $fileContent = '';
+              foreach ($arrFileContent as $line)
+              {
+                     $fileContent .= '<p class="tl_help">' . $line . '</p>';
+              }
+
+              return '
+<div class="parsedFile">
+       <label><h2>' . $GLOBALS['TL_LANG']['tl_import_from_csv']['fileContent'][0] . '</h2></label>
+       <div class="fileContentBox">
+              <div>
+                     ' . $fileContent . '
+              </div>
+       </div>
+</div>
+             ';
+       }
+
+
+       /**
         * field_callback generateReportMarkup
         * @return string
         */
        public function generateReportMarkup()
        {
+
               $html = '<h2>Systemmeldung:</h2>';
               $html .= '<table id="reportTable" class="reportTable">';
               if (is_array($_SESSION['import_from_csv']['report']))
@@ -327,6 +376,8 @@ class tl_import_from_csv extends Backend
               }
               return $arrOptions;
        }
+
+
        /**
         * Parse Backend Template Hook
         * @param string
@@ -346,7 +397,7 @@ class tl_import_from_csv extends Backend
                      $strContent = preg_replace('/<input type=\"submit\" name=\"saveNcreate\" id=\"saveNcreate\" class=\"tl_submit\" accesskey=\"n\" value=\"((\r|\n|.)+?)\">/', '<input type="submit" name="saveNcreate" id="saveNcreate" class="tl_submit importButton" accesskey="n" value="' . $GLOBALS['TL_LANG']['tl_import_from_csv']['launchImportButton'] . '">', $strContent);
 
 
-                     if(strstr($strContent, 'reportTable'))
+                     if (strstr($strContent, 'reportTable'))
                      {
                             $strContent = preg_replace('/<input type=\"submit\" name=\"save\"((\r|\n|.)+?)>/', '', $strContent);
                             $strContent = preg_replace('/<input type=\"submit\" name=\"saveNclose\"((\r|\n|.)+?)>/', '', $strContent);

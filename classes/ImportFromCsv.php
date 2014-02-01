@@ -1,19 +1,21 @@
 <?php
-
 /**
  * Contao Open Source CMS
  * Copyright (C) 2005-2012 Leo Feyer
  * @package import_from_csv
+ * @author Marko Cupic 2014, extension sponsered by Rainer-Maria Fritsch - Fast-Doc UG, Berlin
  * @link    http://www.contao.org
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
  */
+
 /**
  * Run in a custom namespace, so the class can be replaced
  */
 namespace MCupic;
+
 /**
  * Class ImportFromCsv
- * @copyright Marko Cupic 2014
+ * Copyright: 2014 Marko Cupic Sponsor der Erweiterung: Fast-Doc UG, Berlin
  * @author Marko Cupic <m.cupic@gmx.ch>
  * @package import_from_csv
  */
@@ -46,8 +48,8 @@ class ImportFromCsv extends \Backend
               $_SESSION['import_from_csv']['report'] = array();
 
 
-              \System::loadLanguageFile('tl_member');
-              $this->loadDataContainer('tl_member');
+              \System::loadLanguageFile($strTable);
+              $this->loadDataContainer($strTable);
 
               // store the options in $this->arrData
               $this->arrData = array(
@@ -88,8 +90,8 @@ class ImportFromCsv extends \Backend
 
               // trim quotes in the first line and get the fieldnames
               $arrFieldnames = array_map(array(
-                                                $this,
-                                                'myTrim'
+                                              $this,
+                                              'myTrim'
                                          ), $arrFieldnames);
 
               // store each line as an entry in the db
@@ -101,13 +103,11 @@ class ImportFromCsv extends \Backend
                      {
                             continue;
                      }
+
                      // separate the line into the different fields
                      $arrLine = explode($this->arrData['fieldSeparator'], $lineContent);
-                     // trim quotes
-                     $arrLine = array_map(array(
-                                                 $this,
-                                                 'myTrim'
-                                          ), $arrLine);
+
+
                      $set = array();
                      foreach ($arrFieldnames as $k => $fieldname)
                      {
@@ -121,7 +121,13 @@ class ImportFromCsv extends \Backend
                             {
                                    continue;
                             }
+
                             $fieldContent = $arrLine[$k];
+
+                            // trim quotes
+                            $fieldContent = $this->myTrim($fieldContent);
+
+
                             // reinsert the newlines
                             $fieldContent = str_replace('[NEWLINE-N]', chr(10), $fieldContent);
                             $fieldContent = str_replace('[DOUBLE-QUOTE]', '"', $fieldContent);
@@ -167,7 +173,6 @@ class ImportFromCsv extends \Backend
                                    $fieldContent = $objWidget->value;
 
                                    $rgxp = $arrDCA['eval']['rgxp'];
-
                                    // Convert date formats into timestamps (check the eval setting first -> #3063)
                                    if (($rgxp == 'date' || $rgxp == 'time' || $rgxp == 'datim') && $fieldContent != '')
                                    {
@@ -215,9 +220,12 @@ class ImportFromCsv extends \Backend
                      // insert data record
                      if (!$doNotSave)
                      {
-                            if ($this->Database->fieldExists('tstamp', $strTable) && !$set['tstamp'])
+                            if ($this->Database->fieldExists('tstamp', $strTable))
                             {
-                                   $set['tstamp'] == time();
+                                   if (!$set['tstamp'] > 0)
+                                   {
+                                          $set['tstamp'] = time();
+                                   }
                             }
 
                             try
@@ -289,7 +297,6 @@ class ImportFromCsv extends \Backend
         */
        private function myTrim($strFieldname)
        {
-
               return trim($strFieldname, $this->arrData['fieldEnclosure']);
        }
 }
