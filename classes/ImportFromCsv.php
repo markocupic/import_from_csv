@@ -80,8 +80,8 @@ class ImportFromCsv extends \Backend
 
               // trim quotes in the first line and get the fieldnames
               $arrFieldnames = array_map(array(
-                                              $this,
-                                              'myTrim'
+                                                $this,
+                                                'myTrim'
                                          ), $arrFieldnames);
 
               // store each line as an entry in the db
@@ -151,16 +151,24 @@ class ImportFromCsv extends \Backend
                                    {
                                           if ($arrDCA['eval']['multiple'] === true)
                                           {
-                                                 $fieldContent = serialize(explode($arrDelim, $fieldContent));
-                                                 $objWidget->value = $fieldContent;
+                                                 // Security issues in Contao #6695
+                                                 if (version_compare(VERSION . BUILD, '3.2.5', '>='))
+                                                 {
+                                                        $fieldContent = explode($arrDelim, $fieldContent);
+                                                 }
+                                                 else
+                                                 {
+                                                        $fieldContent = serialize(explode($arrDelim, $fieldContent));
+                                                 }
                                                  \Input::setPost($fieldname, $fieldContent);
+                                                 $objWidget->value = $fieldContent;
                                           }
                                    }
 
                                    // validate input
                                    $objWidget->validate();
                                    $fieldContent = $objWidget->value;
-
+                                   //echo var_dump($fieldContent);
                                    $rgxp = $arrDCA['eval']['rgxp'];
 
                                    // Convert date formats into timestamps (check the eval setting first -> #3063)
@@ -200,7 +208,7 @@ class ImportFromCsv extends \Backend
                                    }
                             }
 
-                            $set[$fieldname] = $fieldContent;
+                            $set[$fieldname] = is_array($fieldContent) ? serialize($fieldContent) : $fieldContent;
 
                      }
 
