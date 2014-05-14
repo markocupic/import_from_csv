@@ -160,6 +160,7 @@ class ImportFromCsv extends \Backend
                                                  {
                                                         $fieldContent = serialize(explode($arrDelim, $fieldContent));
                                                  }
+
                                                  \Input::setPost($fieldname, $fieldContent);
                                                  $objWidget->value = $fieldContent;
                                           }
@@ -223,6 +224,25 @@ class ImportFromCsv extends \Backend
                                    }
                             }
 
+                            // add new member to newsletter recipient list
+                            if($strTable == 'tl_member' && $set['email'] != '' && $set['newsletter'] != ''){
+                                   foreach(deserialize($set['newsletter']) as $newsletterId)
+                                   {
+                                          // check for unique email-address
+                                          $objRecipient = $this->Database->prepare("SELECT COUNT(*) AS count FROM tl_newsletter_recipients WHERE email=? AND pid=(SELECT pid FROM tl_newsletter_recipients WHERE id=?) AND id!=?")
+                                                               ->execute($set['email'], $newsletterId, $newsletterId);
+
+                                          if (!$objRecipient->count)
+                                          {
+                                                 $arrRecipient = array();
+                                                 $arrRecipient['tstamp'] = time();
+                                                 $arrRecipient['pid'] = $newsletterId;
+                                                 $arrRecipient['email'] = $set['email'];
+                                                 $this->Database->prepare('INSERT INTO tl_newsletter_recipients %s')->set($arrRecipient)->executeUncached();
+                                          }
+                                   }
+                            }
+
                             try
                             {
                                    // insert entry into database
@@ -276,4 +296,3 @@ class ImportFromCsv extends \Backend
               return trim($strFieldname, $this->arrData['fieldEnclosure']);
        }
 }
-
