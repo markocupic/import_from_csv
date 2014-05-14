@@ -216,11 +216,21 @@ class ImportFromCsv extends \Backend
                      // insert data record
                      if (!$doNotSave)
                      {
+                            // insert tstamp
                             if ($this->Database->fieldExists('tstamp', $strTable))
                             {
                                    if (!$set['tstamp'] > 0)
                                    {
                                           $set['tstamp'] = time();
+                                   }
+                            }
+
+                            // insert dateAdded (tl_member)
+                            if ($this->Database->fieldExists('dateAdded', $strTable))
+                            {
+                                   if (!$set['dateAdded'] > 0)
+                                   {
+                                          $set['dateAdded'] = time();
                                    }
                             }
 
@@ -238,6 +248,7 @@ class ImportFromCsv extends \Backend
                                                  $arrRecipient['tstamp'] = time();
                                                  $arrRecipient['pid'] = $newsletterId;
                                                  $arrRecipient['email'] = $set['email'];
+                                                 $arrRecipient['active'] = '1';
                                                  $this->Database->prepare('INSERT INTO tl_newsletter_recipients %s')->set($arrRecipient)->executeUncached();
                                           }
                                    }
