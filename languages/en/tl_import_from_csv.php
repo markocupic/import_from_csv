@@ -4,7 +4,7 @@
  * Copyright (C) 2005-2012 Leo Feyer
  * @package import_from_csv
  * @author Marko Cupic 2014, extension sponsered by Rainer-Maria Fritsch - Fast-Doc UG, Berlin
- * @link    http://www.contao.org
+ * @link https://github.com/markocupic/import_from_csv
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
  */
 

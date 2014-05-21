@@ -6,6 +6,7 @@
  * @author Marko Cupic 2014, extension sponsered by Rainer-Maria Fritsch - Fast-Doc UG, Berlin
  * @link    http://www.contao.org
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
+ * @link https://github.com/markocupic/import_from_csv
  */
 
 $GLOBALS['TL_DCA']['tl_import_from_csv'] = array(
