@@ -4,7 +4,7 @@
  * Copyright (C) 2005-2012 Leo Feyer
  * @package import_from_csv
  * @author Marko Cupic 2014, extension sponsered by Rainer-Maria Fritsch - Fast-Doc UG, Berlin
- * @link    http://www.contao.org
+ * @link https://github.com/markocupic/import_from_csv
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
  */
 
@@ -30,7 +30,6 @@ class ImportFromCsv extends \Backend
         */
        public $arrData;
 
-
        /**
         * @param $objCsvFile
         * @param $strTable
@@ -43,7 +42,6 @@ class ImportFromCsv extends \Backend
         */
        public function importCsv($objCsvFile, $strTable, $strImportMode, $arrSelectedFields = null, $strFieldseparator = ';', $strFieldenclosure = '', $strPrimaryKey = 'id', $arrDelim = '||')
        {
-
               // store sucess or failure message in the session
               $_SESSION['import_from_csv']['report'] = array();
 
@@ -54,14 +52,7 @@ class ImportFromCsv extends \Backend
               $this->loadDataContainer($strTable);
 
               // store the options in $this->arrData
-              $this->arrData = array(
-                     'tablename' => $strTable,
-                     'primaryKey' => $strPrimaryKey,
-                     'importMode' => $strImportMode,
-                     'selectedFields' => is_array($arrSelectedFields) ? $arrSelectedFields : array(),
-                     'fieldSeparator' => $strFieldseparator,
-                     'fieldEnclosure' => $strFieldenclosure,
-              );
+              $this->arrData = array('tablename' => $strTable, 'primaryKey' => $strPrimaryKey, 'importMode' => $strImportMode, 'selectedFields' => is_array($arrSelectedFields) ? $arrSelectedFields : array(), 'fieldSeparator' => $strFieldseparator, 'fieldEnclosure' => $strFieldenclosure,);
 
               // truncate table
               if ($this->arrData['importMode'] == 'truncate_table')
@@ -79,10 +70,7 @@ class ImportFromCsv extends \Backend
               $arrFieldnames = explode($this->arrData['fieldSeparator'], $arrFileContent[0]);
 
               // trim quotes in the first line and get the fieldnames
-              $arrFieldnames = array_map(array(
-                                                $this,
-                                                'myTrim'
-                                         ), $arrFieldnames);
+              $arrFieldnames = array_map(array($this, 'myTrim'), $arrFieldnames);
 
               // store each line as an entry in the db
               foreach ($arrFileContent as $line => $lineContent)
@@ -111,15 +99,15 @@ class ImportFromCsv extends \Backend
                             {
                                    continue;
                             }
-                            
+
                             // get the field content
                             $fieldContent = $arrLine[$k];
 
-                            // get the field-content as string see #2
-                            $fieldContent = strVal($fieldContent);
-
                             // trim quotes
                             $fieldContent = $this->myTrim($fieldContent);
+
+                            // convert variable to a string (see #2)
+                            $fieldContent = strval($fieldContent);
 
                             // get the DCA of the current field
                             $arrDCA =  & $GLOBALS['TL_DCA'][$strTable]['fields'][$fieldname];
@@ -138,7 +126,6 @@ class ImportFromCsv extends \Backend
                             // Use form widgets for input validation
                             if (class_exists($strClass))
                             {
-
                                    $objWidget = new $strClass($strClass::getAttributesFromDca($arrDCA, $fieldname, $fieldContent, '', '', $this));
                                    $objWidget->storeValues = false;
 
@@ -172,10 +159,9 @@ class ImportFromCsv extends \Backend
                                    // validate input
                                    $objWidget->validate();
                                    $fieldContent = $objWidget->value;
-                                   //echo var_dump($fieldContent);
-                                   $rgxp = $arrDCA['eval']['rgxp'];
 
-                                   // Convert date formats into timestamps (check the eval setting first -> #3063)
+                                   // Convert date formats into timestamps
+                                   $rgxp = $arrDCA['eval']['rgxp'];
                                    if (($rgxp == 'date' || $rgxp == 'time' || $rgxp == 'datim') && $fieldContent != '')
                                    {
                                           try
@@ -183,8 +169,7 @@ class ImportFromCsv extends \Backend
                                                  $strTimeFormat = $GLOBALS['TL_CONFIG'][$rgxp . 'Format'];
                                                  $objDate = new \Date($fieldContent, $strTimeFormat);
                                                  $fieldContent = $objDate->tstamp;
-                                          }
-                                          catch (\OutOfBoundsException $e)
+                                          } catch (\OutOfBoundsException $e)
                                           {
                                                  $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['invalidDate'], $fieldContent));
                                           }
@@ -213,7 +198,6 @@ class ImportFromCsv extends \Backend
                             }
 
                             $set[$fieldname] = is_array($fieldContent) ? serialize($fieldContent) : $fieldContent;
-
                      }
 
                      // insert data record
@@ -260,16 +244,13 @@ class ImportFromCsv extends \Backend
                             try
                             {
                                    // insert entry into database
-                                   $this->Database->prepare('INSERT INTO `' . $strTable . '` %s')->set($set)->executeUncached();
-
-                            }
-                            catch (Exception $e)
+                                   $this->Database->prepare('INSERT INTO ' . $strTable . ' %s')->set($set)->executeUncached();
+                            } catch (Exception $e)
                             {
                                    $set['insertError'] = $e->getMessage();
                                    $doNotSave = true;
                             }
                      }
-
 
                      // generate html markup for the import report table
                      $htmlReport = '';
@@ -299,14 +280,12 @@ class ImportFromCsv extends \Backend
               }
        }
 
-
        /**
         * @param string
         * @return string
         */
        private function myTrim($strFieldname)
        {
-
               return trim($strFieldname, $this->arrData['fieldEnclosure']);
        }
 }
