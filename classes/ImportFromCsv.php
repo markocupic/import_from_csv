@@ -111,9 +111,12 @@ class ImportFromCsv extends \Backend
                             {
                                    continue;
                             }
-
-                            // get the field-content
+                            
+                            // get the field content
                             $fieldContent = $arrLine[$k];
+
+                            // get the field-content as string see #2
+                            $fieldContent = strVal($fieldContent);
 
                             // trim quotes
                             $fieldContent = $this->myTrim($fieldContent);
@@ -135,8 +138,8 @@ class ImportFromCsv extends \Backend
                             // Use form widgets for input validation
                             if (class_exists($strClass))
                             {
-                                   $objWidget = new $strClass($strClass::getAttributesFromDca($arrDCA, $fieldname, $fieldContent, '', '', $this));
 
+                                   $objWidget = new $strClass($strClass::getAttributesFromDca($arrDCA, $fieldname, $fieldContent, '', '', $this));
                                    $objWidget->storeValues = false;
 
                                    // Set post var, so the content can be validated
@@ -235,12 +238,12 @@ class ImportFromCsv extends \Backend
                             }
 
                             // add new member to newsletter recipient list
-                            if($strTable == 'tl_member' && $set['email'] != '' && $set['newsletter'] != ''){
-                                   foreach(deserialize($set['newsletter']) as $newsletterId)
+                            if ($strTable == 'tl_member' && $set['email'] != '' && $set['newsletter'] != '')
+                            {
+                                   foreach (deserialize($set['newsletter']) as $newsletterId)
                                    {
                                           // check for unique email-address
-                                          $objRecipient = $this->Database->prepare("SELECT COUNT(*) AS count FROM tl_newsletter_recipients WHERE email=? AND pid=(SELECT pid FROM tl_newsletter_recipients WHERE id=?) AND id!=?")
-                                                               ->execute($set['email'], $newsletterId, $newsletterId);
+                                          $objRecipient = $this->Database->prepare("SELECT COUNT(*) AS count FROM tl_newsletter_recipients WHERE email=? AND pid=(SELECT pid FROM tl_newsletter_recipients WHERE id=?) AND id!=?")->execute($set['email'], $newsletterId, $newsletterId);
 
                                           if (!$objRecipient->count)
                                           {
