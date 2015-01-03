@@ -1,0 +1,41 @@
+{
+    "name":"markocupic/import_from_csv",
+    "description":"Import datarecords from csv-textfile. Backend extension for the Contao Open Source CMS",
+    "keywords":["contao", "Import from csv"],
+    "type":"contao-module",
+    "license":"LGPL-3.0+",
+    "authors":[
+        {
+            "name":"Marko Cupic",
+            "email":"m.cupic@gmx.ch",
+            "homepage":"http://4ae-racing-team.ch",
+            "role":"Developer"
+        }
+    ],
+    "support":{
+        "issues":"https://github.com/markocupic/import_from_csv/issues",
+        "source":"https://github.com/markocupic/import_from_csv",
+        "forum":"https://community.contao.org/de/showthread.php?47438-Mitglieder-Import-contao-3-2ff&highlight=markocupic+import"
+    },
+    "require":{
+        "php":">=5.3",
+        "contao/core":">=3.2,<4",
+        "contao-community-alliance/composer-plugin": "*"  
+    },
+    "replace": {
+        "contao-legacy/import_from_csv":"*"
+    },
+    "conflict": {
+        "contao/core": "3.0.*"
+    },
+    "autoload":{
+        "classmap":[""]
+    },
+    "extra":{
+        "contao":{
+            "sources":{
+                "":"system/modules/import_from_csv"
+            }
+        }
+    }
+}
