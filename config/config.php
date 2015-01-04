@@ -32,6 +32,7 @@ if (TL_MODE == 'BE' && $_GET['do'] == 'import_from_csv')
  */
 if (TL_MODE == 'BE' && \Input::get('do') == 'import_from_csv')
 {
-    $GLOBALS['TL_HOOKS']['importFromCsv'][] = array('MyValidateImportFromCsvHook', 'myValidate');
+    // disable Hook
+    // $GLOBALS['TL_HOOKS']['importFromCsv'][] = array('MyValidateImportFromCsvHook', 'myValidate');
 }
 
