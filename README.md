@@ -37,9 +37,16 @@ Tipp: Wenn Sie die Datei ausgewählt haben, klicken Sie voher auf "Speichern" un
 
 ## Importmechanismus über Hook anpassen
 
-Mit einem updatesicheren Hook lässt sich die Validierung umgehen oder anpassen.
-Wie üblich ersellt man dafür ein Verzeichnis im Modulverzeichnis. z.B. system/modules/my_import_from_csv_hook
-Darin erstellt man ein Verzeichnis config mit einer Datei config.php
+Mit einem updatesicheren Hook lässt sich die Validierung umgehen oder anpassen. Erstellen Sie dafür folgende Ordner und Dateistruktur:
+
+system/modules/my_import_from_csv_hook/
+    config/
+        config.php
+        autoload.php
+        autoload.ini
+    classes/MyValidateImportFromCsv.php
+
+
 In die config.php schreibt man folgendes:
 ```php
 <?php
@@ -54,9 +61,11 @@ if (TL_MODE == 'BE' && \Input::get('import_from_csv') == 'import_from_csv')
 
 ```
 
-Danach erstellt man eine Klasse. Diese speichert man im Verzeichnis system/modules/my_import_from_csv_hook/classes/MyValidateImportFromCsv.php
+In die MyValidateImportFromCsv.php schreiben Sie folgendes. In die myValidate()-Methode scheiben Sie Ihren Validierungscode. Die Methode erwartet 4 Parameter und gibt den modifizierten Feldinhalt als String zurück.
+
 ```php
 <?php
+
 /**
  * Contao Open Source CMS
  * Copyright (C) 2005-2012 Leo Feyer
@@ -109,7 +118,7 @@ class MyValidateImportFromCsv extends \System
 
 ```
 
-Damit Contao weiss, wo die Klasse zu finden ist, sollte zum Schluss im Backend für das neu erstellte Modul der Autoload-Creator gestartet werden.
+Damit Contao weiss, wo die Klasse zu finden ist, sollte zum Schluss im Backend für das neu erstellte Modul der Autoload-Creator gestartet werden. Dieser füllt die autoload-Dateien mit dem nötigen Code.
 Et voilà!
 Viel Spass!!!
 

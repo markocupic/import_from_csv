@@ -264,6 +264,8 @@ class tl_import_from_csv extends Backend
     <p class="tl_help">Legen Sie mit Excel oder einem Texteditor ihrer Wahl eine Kommaseparierte Textdatei an (csv). In die erste Zeile schreiben Sie die korrekten Feldnamen. Die einzelnen Felder sollten durch ein Trennzeichen, üblicherweise das Semikolon ";", abgegrenzt werden. Feldinhalt, der in der Datenbank als serialisiertes Array abgelegt wird (z.B. Gruppenzugehörigkeiten), muss durch zwei aufeinanderfolgende pipe-Zeichen abgegrenzt werden "||". Feldbegrenzer und Feldtrennzeichen können individuell festgelegt werden. Wichtig! Beginnen Sie jeden Datensatz mit einer neuen Zeile. Keine Zeilenumbrüche im Datensatz.<br>Laden Sie die erstellte csv-Datei auf den Server. Anschliessend starten Sie den Importvorgang mit einem Klick auf den grossen Button.</p>
     <p class="tl_help">Beim Importvorgang werden die Inhalte auf Gültigkeit überprüft.</p>
     <p class="tl_help">Achtung! Nutzen Sie das Modul nur, wenn Sie sich ihrer Sache sicher sind. Gelöschte Daten können nur wiederhergestellt werden, wenn Sie vorher ein Backup gemacht haben.</p>
+
+    <p><br>Weitere Hilfe gibt es unter: <a href="https://github.com/markocupic/import_from_csv">https://github.com/markocupic/import_from_csv</a></p>
 </div>
              ';
        }
