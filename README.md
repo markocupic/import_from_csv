@@ -35,4 +35,81 @@ Legen Sie fest, ob die Datensätze aus der csv-Datei in der Zieltabelle angehän
 Abschliessend wählen Sie die Datei aus, von der in die Datenbank geschrieben werden soll.
 Tipp: Wenn Sie die Datei ausgewählt haben, klicken Sie voher auf "Speichern" und Sie kriegen eine Vorschau.
 
+## Importmechanismus über Hook anpassen
+
+Mit einem updatesicheren Hook lässt sich die Validierung umgehen oder anpassen.
+Wie üblich ersellt man dafür ein Verzeichnis im Modulverzeichnis. z.B. system/modules/my_import_from_csv_hook
+Darin erstellt man ein Verzeichnis config mit einer Datei config.php
+In die config.php schreibt man folgendes:
+```php
+<?php
+
+/**
+ * HOOKS
+ */
+if (TL_MODE == 'BE' && \Input::get('import_from_csv') == 'import_from_csv')
+{
+    $GLOBALS['TL_HOOKS']['importFromCsv'][] = array('MyValidateImportFromCsv', 'myValidate');
+}
+
+```
+
+Danach erstellt man eine Klasse. Diese speichert man im Verzeichnis system/modules/my_import_from_csv_hook/classes/MyValidateImportFromCsv.php
+```php
+<?php
+/**
+ * Contao Open Source CMS
+ * Copyright (C) 2005-2012 Leo Feyer
+ * @package import_from_csv
+ * @author Marko Cupic 2014, extension sponsered by Rainer-Maria Fritsch - Fast-Doc UG, Berlin
+ * @link https://github.com/markocupic/import_from_csv
+ * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
+ */
+
+/**
+ * Run in a custom namespace, so the class can be replaced
+ */
+namespace MCupic;
+
+/**
+ * Class MyValidateImportFromCsv
+ * Copyright: 2014 Marko Cupic Sponsor der Erweiterung: Fast-Doc UG, Berlin
+ * @author Marko Cupic <m.cupic@gmx.ch>
+ * @package import_from_csv
+ */
+
+
+class MyValidateImportFromCsv extends \System
+{
+
+    /**
+     * @param $strTable
+     * @param $arrDCA
+     * @param $strFieldname
+     * @param $strFieldContent
+     * @param $objBackendModule
+     * @return string
+     */
+    public function myValidate($strTable, $arrDCA, $strFieldname, $strFieldContent = '', $objBackendModule = null)
+    {
+        if ($strTable == 'tl_member')
+        {
+            if ($strFieldname == 'firstname')
+            {
+                $strFieldContent = 'Bruce';
+            }
+            if ($strFieldname == 'lastname')
+            {
+                $strFieldContent = 'Springsteen';
+            }
+        }
+        return $strFieldContent;
+    }
+}
+
+```
+
+Damit Contao weiss, wo die Klasse zu finden ist, sollte zum Schluss im Backend für das neu erstellte Modul der Autoload-Creator gestartet werden.
+Et voilà!
+Viel Spass!!!
 
