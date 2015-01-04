@@ -54,14 +54,14 @@ In die config.php schreibt man folgendes:
 /**
  * HOOKS
  */
-if (TL_MODE == 'BE' && \Input::get('import_from_csv') == 'import_from_csv')
+if (TL_MODE == 'BE' && \Input::get('do') == 'import_from_csv')
 {
     $GLOBALS['TL_HOOKS']['importFromCsv'][] = array('MyValidateImportFromCsv', 'myValidate');
 }
 
 ```
 
-In die MyValidateImportFromCsv.php schreiben Sie folgendes. In die myValidate()-Methode scheiben Sie Ihren Validierungscode. Die Methode erwartet 4 Parameter und gibt den modifizierten Feldinhalt als String zurück.
+In die MyValidateImportFromCsv.php schreiben Sie folgendes. In die myValidate()-Methode scheiben Sie Ihren Validierungslogik. Die Methode erwartet 4 Parameter und gibt den modifizierten Feldinhalt als String zurück.
 
 ```php
 <?php
