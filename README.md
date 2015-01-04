@@ -8,7 +8,7 @@ Ein Beispiel für diese Datei findet sich im Verzeichnis import_from_csv/csv/exa
 
 ## Warnung!
 
-Achtung! Das Modul bietet einen grossen Nutzen. Der Anwender sollte aber wissen, was er tut, da bei falscher Anwendung Datenbanktabellen "zerschossen" werden können.
+Achtung! Das Modul bietet einen grossen Nutzen. Der Anwender sollte aber wissen, was er tut, da bei falscher Anwendung Datenbanktabellen "zerschossen" werden können und Contao danach nicht mehr funktionstüchtig ist.
 
 ## Einstellungen
 
@@ -29,7 +29,7 @@ Geben Sie an, durch welches Zeichen in der csv-Datei die Feldinhalte voneinander
 Kontrollieren Sie, ob in der csv-Datei die Feldinhalte noch zusätzlich von einem Zeichen eingeschlossen sind. Oft ist das das doppelte Anführungszeichen. => "
 
 ### Import Modus (Pflichtfeld)
-Legen Sie fest, ob die Datensätze aus der csv-Datei in der Tabelle angehängt werden oder die Tabelle vorher geleert werden soll. Achtung! Gelöschte Datensätze lassen sich, wenn kein Backup vorhanden, nicht mehr wiederherstellen.
+Legen Sie fest, ob die Datensätze aus der csv-Datei in der Zieltabelle angehängt werden oder die Zieltabelle vorher geleert werden soll (alter table). Achtung! Gelöschte Datensätze lassen sich, wenn kein Backup vorhanden, nicht mehr wiederherstellen.
 
 ### Datei auswählen (Pflichtfeld)
 Abschliessend wählen Sie die Datei aus, von der in die Datenbank geschrieben werden soll.
