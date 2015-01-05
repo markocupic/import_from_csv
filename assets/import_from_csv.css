@@ -20,13 +20,16 @@
     font-size: 10px;
 }
 
-#reportTable .allOk td {
-    color: #008000;
+#reportTable .allOk td,
+#summary .allOk {
+    color: #008000 !important;
 }
 
-#reportTable .error td {
-    color: red;
+#reportTable .error td,
+#summary .error {
+    color: red !important;
 }
+
 #reportTable .error td .errMsg {
     font-weight: bold;
 }

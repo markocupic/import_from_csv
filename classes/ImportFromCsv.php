@@ -3,6 +3,7 @@
 /**
  * Contao Open Source CMS
  * Copyright (C) 2005-2012 Leo Feyer
+ *
  * @package import_from_csv
  * @author Marko Cupic 2014, extension sponsered by Rainer-Maria Fritsch - Fast-Doc UG, Berlin
  * @link https://github.com/markocupic/import_from_csv
@@ -17,6 +18,7 @@ namespace MCupic;
 /**
  * Class ImportFromCsv
  * Copyright: 2014 Marko Cupic Sponsor der Erweiterung: Fast-Doc UG, Berlin
+ *
  * @author Marko Cupic <m.cupic@gmx.ch>
  * @package import_from_csv
  */
@@ -30,6 +32,7 @@ class ImportFromCsv extends \Backend
      * import options
      */
     public $arrData;
+
 
     /**
      * @param $objCsvFile
@@ -53,7 +56,11 @@ class ImportFromCsv extends \Backend
         $this->loadDataContainer($strTable);
 
         // store the options in $this->arrData
-        $this->arrData = array('tablename' => $strTable, 'primaryKey' => $strPrimaryKey, 'importMode' => $strImportMode, 'selectedFields' => is_array($arrSelectedFields) ? $arrSelectedFields : array(), 'fieldSeparator' => $strFieldseparator, 'fieldEnclosure' => $strFieldenclosure,);
+        $this->arrData = array(
+            'tablename'      => $strTable, 'primaryKey' => $strPrimaryKey, 'importMode' => $strImportMode,
+            'selectedFields' => is_array($arrSelectedFields) ? $arrSelectedFields : array(),
+            'fieldSeparator' => $strFieldseparator, 'fieldEnclosure' => $strFieldenclosure,
+        );
 
         // truncate table
         if ($this->arrData['importMode'] == 'truncate_table')
@@ -73,15 +80,25 @@ class ImportFromCsv extends \Backend
         // trim quotes in the first line and get the fieldnames
         $arrFieldnames = array_map(array($this, 'myTrim'), $arrFieldnames);
 
+        // count rows
+        $rows = 0;
+
+        // count errors
+        $insertError = 0;
+
         // store each line as an entry in the db
         foreach ($arrFileContent as $line => $lineContent)
         {
             $doNotSave = false;
+
             // line 0 contains the fieldnames
             if ($line == 0)
             {
                 continue;
             }
+
+            // count rows
+            $rows++;
 
             // separate the line into the different fields
             $arrLine = explode($this->arrData['fieldSeparator'], $lineContent);
@@ -89,6 +106,7 @@ class ImportFromCsv extends \Backend
             $set = array();
             foreach ($arrFieldnames as $k => $fieldname)
             {
+
                 $customValidation = false;
 
                 // continue if field is excluded from import
@@ -161,7 +179,8 @@ class ImportFromCsv extends \Backend
                             if (version_compare(VERSION . BUILD, '3.2.5', '>='))
                             {
                                 $fieldContent = explode($arrDelim, $fieldContent);
-                            } else
+                            }
+                            else
                             {
                                 $fieldContent = serialize(explode($arrDelim, $fieldContent));
                             }
@@ -173,18 +192,20 @@ class ImportFromCsv extends \Backend
 
                     // validate input
                     $objWidget->validate();
+
                     $fieldContent = $objWidget->value;
 
                     // Convert date formats into timestamps
                     $rgxp = $arrDCA['eval']['rgxp'];
-                    if (($rgxp == 'date' || $rgxp == 'time' || $rgxp == 'datim') && $fieldContent != '')
+                    if (($rgxp == 'date' || $rgxp == 'time' || $rgxp == 'datim') && $fieldContent != '' && !$objWidget->hasErrors())
                     {
                         try
                         {
                             $strTimeFormat = $GLOBALS['TL_CONFIG'][$rgxp . 'Format'];
                             $objDate = new \Date($fieldContent, $strTimeFormat);
                             $fieldContent = $objDate->tstamp;
-                        } catch (\OutOfBoundsException $e)
+                        }
+                        catch (\OutOfBoundsException $e)
                         {
                             $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['invalidDate'], $fieldContent));
                         }
@@ -201,7 +222,8 @@ class ImportFromCsv extends \Backend
                     {
                         $doNotSave = true;
                         $fieldContent = sprintf('"%s" => <span class="errMsg">%s</span>', $fieldContent, $objWidget->getErrorsAsString());
-                    } else
+                    }
+                    else
                     {
                         // Set the correct empty value
                         if ($fieldContent === '')
@@ -241,7 +263,8 @@ class ImportFromCsv extends \Backend
                     foreach (deserialize($set['newsletter']) as $newsletterId)
                     {
                         // check for unique email-address
-                        $objRecipient = $this->Database->prepare("SELECT COUNT(*) AS count FROM tl_newsletter_recipients WHERE email=? AND pid=(SELECT pid FROM tl_newsletter_recipients WHERE id=?) AND id!=?")->execute($set['email'], $newsletterId, $newsletterId);
+                        $objRecipient = $this->Database->prepare("SELECT COUNT(*) AS count FROM tl_newsletter_recipients WHERE email=? AND pid=(SELECT pid FROM tl_newsletter_recipients WHERE id=?) AND id!=?")
+                            ->execute($set['email'], $newsletterId, $newsletterId);
 
                         if (!$objRecipient->count)
                         {
@@ -250,7 +273,8 @@ class ImportFromCsv extends \Backend
                             $arrRecipient['pid'] = $newsletterId;
                             $arrRecipient['email'] = $set['email'];
                             $arrRecipient['active'] = '1';
-                            $this->Database->prepare('INSERT INTO tl_newsletter_recipients %s')->set($arrRecipient)->executeUncached();
+                            $this->Database->prepare('INSERT INTO tl_newsletter_recipients %s')->set($arrRecipient)
+                                ->executeUncached();
                         }
                     }
                 }
@@ -259,7 +283,8 @@ class ImportFromCsv extends \Backend
                 {
                     // insert entry into database
                     $this->Database->prepare('INSERT INTO ' . $strTable . ' %s')->set($set)->executeUncached();
-                } catch (Exception $e)
+                }
+                catch (Exception $e)
                 {
                     $set['insertError'] = $e->getMessage();
                     $doNotSave = true;
@@ -273,7 +298,11 @@ class ImportFromCsv extends \Backend
             {
                 $cssClass = 'error';
                 $htmlReport .= sprintf('<tr class="%s"><td class="tdTitle" colspan="2">#%s Datensatz konnte nicht angelegt werden!</td></tr>', $cssClass, $line);
-            } else
+
+                // increment error counter if necessary
+                $insertError++;
+            }
+            else
             {
                 $htmlReport .= sprintf('<tr class="%s"><td class="tdTitle" colspan="2">#%s Datensatz erfolgreich angelegt!</td></tr>', $cssClass, $line);
             }
@@ -287,11 +316,18 @@ class ImportFromCsv extends \Backend
                 $htmlReport .= sprintf('<tr class="%s"><td>%s</td><td>%s</td></tr>', $cssClass, \String::substr($k, 30), \String::substrHtml($v, 90));
             }
 
+
             $htmlReport .= '<tr class="delim"><td>&nbsp;</td><td>&nbsp;</td></tr>';
             $_SESSION['import_from_csv']['report'][] = $htmlReport;
-
         }
+
+        $_SESSION['import_from_csv']['status'] = array(
+            'rows'    => $rows,
+            'success' => $rows - $insertError,
+            'errors'  => $insertError
+        );
     }
+
 
     /**
      * @param string

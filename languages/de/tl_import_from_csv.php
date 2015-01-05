@@ -2,11 +2,11 @@
 /**
  * TL_ROOT/system/modules/import_from_csv/languages/de/tl_import_from_csv.php 
  * 
- * Contao extension: import_from_csv 1.0.0 stable 
+ * Contao extension: import_from_csv 1.0.1 
  * Deutsch translation file 
  * 
- * Copyright : &copy; 2014 Marko Cupic Sponsor der Erweiterung: Fast-Doc UG, Berlin 
- * License   :  
+ * Copyright :  
+ * License   : GNU Lesser Public License (LGPL) 
  * Author    : Marko Cupic (markocupic) 
  * Translator: Marko Cupic (markocupic) 
  * 
@@ -33,5 +33,8 @@ $GLOBALS['TL_LANG']['tl_import_from_csv']['append_entries']['0'] = "Datensätze 
 $GLOBALS['TL_LANG']['tl_import_from_csv']['new']['0'] = "Neuen Importdatensatz anlegen";
 $GLOBALS['TL_LANG']['tl_import_from_csv']['new']['1'] = "Einen neuen Importdatensatz anlegen";
 $GLOBALS['TL_LANG']['tl_import_from_csv']['launchImportButton'] = "Importvorgang starten";
+$GLOBALS['TL_LANG']['tl_import_from_csv']['datarecords'] = "Anzahl Datensätze";
+$GLOBALS['TL_LANG']['tl_import_from_csv']['successful_inserts'] = "Erfolgreiche inserts";
+$GLOBALS['TL_LANG']['tl_import_from_csv']['failed_inserts'] = "Missglückte inserts";
  
 ?>

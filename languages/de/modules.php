@@ -2,11 +2,11 @@
 /**
  * TL_ROOT/system/modules/import_from_csv/languages/de/modules.php 
  * 
- * Contao extension: import_from_csv 1.0.0 stable 
+ * Contao extension: import_from_csv 1.0.1 
  * Deutsch translation file 
  * 
- * Copyright : &copy; 2014 Marko Cupic Sponsor der Erweiterung: Fast-Doc UG, Berlin 
- * License   :  
+ * Copyright :  
+ * License   : GNU Lesser Public License (LGPL) 
  * Author    : Marko Cupic (markocupic) 
  * Translator: Marko Cupic (markocupic) 
  * 
