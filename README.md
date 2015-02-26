@@ -96,10 +96,11 @@ class MyValidateImportFromCsv extends \System
      * @param $arrDCA
      * @param $strFieldname
      * @param $strFieldContent
+     * @param $arrAssoc
      * @param $objBackendModule
      * @return string
      */
-    public function myValidate($strTable, $arrDCA, $strFieldname, $strFieldContent = '', $objBackendModule = null)
+    public function myValidate($strTable, $arrDCA, $strFieldname, $strFieldContent = '', $arrAssoc, $objBackendModule = null)
     {
         if ($strTable == 'tl_member')
         {
