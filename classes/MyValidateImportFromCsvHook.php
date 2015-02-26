@@ -29,11 +29,12 @@ class MyValidateImportFromCsvHook extends \System
      * @param $strTable
      * @param $arrDCA
      * @param $strFieldname
-     * @param $strFieldContent
-     * @param $objBackendModule
+     * @param string $strFieldContent
+     * @param $arrAssoc
+     * @param null $objBackendModule
      * @return string
      */
-    public function myValidate($strTable, $arrDCA, $strFieldname, $strFieldContent = '', $objBackendModule = null)
+    public function myValidate($strTable, $arrDCA, $strFieldname, $strFieldContent = '', $arrAssoc, $objBackendModule = null)
     {
         if ($strTable == 'tl_member')
         {

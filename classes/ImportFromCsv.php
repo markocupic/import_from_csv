@@ -103,6 +103,13 @@ class ImportFromCsv extends \Backend
             // separate the line into the different fields
             $arrLine = explode($this->arrData['fieldSeparator'], $lineContent);
 
+            // Set the associative Array with the line content
+            $assocArray = array();
+            foreach ($arrFieldnames as $k => $fieldname)
+            {
+                $assocArray[$fieldname] = $arrLine[$k];
+            }
+
             $set = array();
             foreach ($arrFieldnames as $k => $fieldname)
             {
@@ -152,7 +159,7 @@ class ImportFromCsv extends \Backend
                     {
                         $customValidation = true;
                         $this->import($callback[0]);
-                        $fieldContent = $this->$callback[0]->$callback[1]($strTable, $arrDCA, $fieldname, $fieldContent, $this);
+                        $fieldContent = $this->$callback[0]->$callback[1]($strTable, $arrDCA, $fieldname, $fieldContent, $assocArray, $this);
                     }
                 }
 
