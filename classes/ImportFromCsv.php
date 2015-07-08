@@ -239,8 +239,7 @@ class ImportFromCsv extends \Backend
                         }
                     }
                 }
-
-                $set[$fieldname] = is_array($fieldContent) ? serialize($fieldContent) : $fieldContent;
+                $set[$fieldname] = is_array($fieldContent) ? serialize($fieldContent) : utf8_encode($fieldContent);
             }
 
             // insert data record
