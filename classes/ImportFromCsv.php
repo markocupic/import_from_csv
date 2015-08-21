@@ -239,7 +239,8 @@ class ImportFromCsv extends \Backend
                         }
                     }
                 }
-                $set[$fieldname] = is_array($fieldContent) ? serialize($fieldContent) : utf8_encode($fieldContent);
+
+                $set[$fieldname] = is_array($fieldContent) ? serialize($fieldContent) : $fieldContent;
             }
 
             // insert data record
@@ -279,8 +280,7 @@ class ImportFromCsv extends \Backend
                             $arrRecipient['pid'] = $newsletterId;
                             $arrRecipient['email'] = $set['email'];
                             $arrRecipient['active'] = '1';
-                            $this->Database->prepare('INSERT INTO tl_newsletter_recipients %s')->set($arrRecipient)
-                                ->executeUncached();
+                            $this->Database->prepare('INSERT INTO tl_newsletter_recipients %s')->set($arrRecipient)->execute();
                         }
                     }
                 }
@@ -288,7 +288,7 @@ class ImportFromCsv extends \Backend
                 try
                 {
                     // insert entry into database
-                    $this->Database->prepare('INSERT INTO ' . $strTable . ' %s')->set($set)->executeUncached();
+                    $this->Database->prepare('INSERT INTO ' . $strTable . ' %s')->set($set)->execute();
                 }
                 catch (Exception $e)
                 {
