@@ -99,8 +99,8 @@ class MyValidateImportFromCsvHook extends \System
     public function myValidate($arrCustomValidation, $objBackendModule = null)
     {
         /**
-         * Überblick über das Datenarray (1. Funtionsparameter):
-        $arrCustomValidation = array(
+         // Überblick über das Datenarray (1. Funtionsparameter):
+         $arrCustomValidation = array(
 
             'strTable'      => 'tablename',
             'arrDCA'        => 'Datacontainer array (DCA) of the current field.',
@@ -111,7 +111,8 @@ class MyValidateImportFromCsvHook extends \System
             'errorMsg'      => 'Define a custom text message if validation fails.',
             'doNotSave'     => 'Set this item to true if you don't want to save the value into the database.',
         );
-        */
+        
+        **/
 
         // tl_member
         if ($arrCustomValidation['strTable'] == 'tl_member')
