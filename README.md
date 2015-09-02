@@ -61,7 +61,7 @@ if (TL_MODE == 'BE' && \Input::get('do') == 'import_from_csv')
 
 ```
 
-In die MyValidateImportFromCsv.php schreiben Sie folgendes. In die myValidate()-Methode scheiben Sie Ihren Validierungslogik. Die Methode erwartet 4 Parameter und gibt den modifizierten Feldinhalt als String zurück.
+In die MyValidateImportFromCsv.php schreiben Sie folgendes. In die myValidate()-Methode scheiben Sie Ihren Validierungslogik. Die Methode erwartet 2 Parameter und gibt als Rückgabewert ein assoziatives Array mit Feldwert, Fehlermeldung, etc. zurück.
 
 ```php
 <?php
@@ -88,32 +88,57 @@ namespace MCupic;
  */
 
 
-class MyValidateImportFromCsv extends \System
+class MyValidateImportFromCsvHook extends \System
 {
 
     /**
-     * @param $strTable
-     * @param $arrDCA
-     * @param $strFieldname
-     * @param $strFieldContent
-     * @param $arrAssoc
-     * @param $objBackendModule
-     * @return string
+     * @param $arrCustomValidation
+     * @param null $objBackendModule
+     * @return array
      */
-    public function myValidate($strTable, $arrDCA, $strFieldname, $strFieldContent = '', $arrAssoc, $objBackendModule = null)
+    public function myValidate($arrCustomValidation, $objBackendModule = null)
     {
-        if ($strTable == 'tl_member')
+        /**
+         * Überblick über das Datenarray (1. Funtionsparameter):
+        $arrCustomValidation = array(
+
+            'strTable'      => 'tablename',
+            'arrDCA'        => 'Datacontainer array (DCA) of the current field.',
+            'fieldname'     => 'fieldname',
+            'value'         => 'value',
+            'arrayLine'     => 'Contains the current line/dataset as associative array.',
+            'hasErrors'     => 'Should be set to true if validation fails.',
+            'errorMsg'      => 'Define a custom text message if validation fails.',
+            'doNotSave'     => 'Set this item to true if you don't want to save the value into the database.',
+        );
+        */
+
+        // tl_member
+        if ($arrCustomValidation['strTable'] == 'tl_member')
         {
-            if ($strFieldname == 'firstname')
+
+            if ($arrCustomValidation['fieldname'] == 'firstname')
             {
-                $strFieldContent = 'Bruce';
+                if($arrCustomValidation['value'] != 'Bruce')
+                {
+                    $arrCustomValidation['hasErrors'] = true;
+                    $arrCustomValidation['errorMsg'] = "Firstname must be 'Bruce'! '" . $arrCustomValidation['value'] . "' given.";
+                    $arrCustomValidation['doNotSave'] = true;
+                }
             }
-            if ($strFieldname == 'lastname')
+
+            if ($arrCustomValidation['fieldname'] == 'lastname')
             {
-                $strFieldContent = 'Springsteen';
+                if($arrCustomValidation['value'] != 'Springsteen')
+                {
+                    $arrCustomValidation['hasErrors'] = true;
+                    $arrCustomValidation['errorMsg'] = "Lastname must be 'Springsteen'! '" . $arrCustomValidation['value'] . "' given.";
+                    $arrCustomValidation['doNotSave'] = true;
+                }
             }
         }
-        return $strFieldContent;
+
+        return $arrCustomValidation;
     }
 }
 

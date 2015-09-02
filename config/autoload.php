@@ -26,7 +26,7 @@ ClassLoader::addNamespaces(array
 ClassLoader::addClasses(array
 (
 	// Classes
-	'MCupic\MyValidateImportFromCsvHook' => 'system/modules/import_from_csv/classes/MyValidateImportFromCsvHook.php',
+	'MCupic\ValidateImportFromCsvHook' => 'system/modules/import_from_csv/classes/ValidateImportFromCsvHook.php',
 	'MCupic\ImportFromCsv'               => 'system/modules/import_from_csv/classes/ImportFromCsv.php',
 
 	// Models

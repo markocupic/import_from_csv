@@ -22,7 +22,7 @@ namespace MCupic;
  */
 
 
-class MyValidateImportFromCsvHook extends \System
+class ValidateImportFromCsvHook extends \System
 {
 
     /**
@@ -72,7 +72,7 @@ class MyValidateImportFromCsvHook extends \System
         }
 
         // tl_user
-        if ($arrCustomValidation['strTable'] == 'tl_uuser')
+        if ($arrCustomValidation['strTable'] == 'tl_user')
         {
 
             if ($arrCustomValidation['fieldname'] == 'username')

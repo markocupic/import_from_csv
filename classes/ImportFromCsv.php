@@ -104,17 +104,17 @@ class ImportFromCsv extends \Backend
             $arrLine = explode($this->arrData['fieldSeparator'], $lineContent);
 
             // Set the associative Array with the line content
-            $assocArray = array();
+            $assocArrayLine = array();
             foreach ($arrFieldnames as $k => $fieldname)
             {
-                $assocArray[$fieldname] = $arrLine[$k];
+                $assocArrayLine[$fieldname] = $arrLine[$k];
             }
 
             $set = array();
             foreach ($arrFieldnames as $k => $fieldname)
             {
 
-                $customValidation = false;
+                $blnCustomValidation = false;
 
                 // continue if field is excluded from import
                 if (!in_array($fieldname, $this->arrData['selectedFields']))
@@ -129,13 +129,13 @@ class ImportFromCsv extends \Backend
                 }
 
                 // get the field content
-                $fieldContent = $arrLine[$k];
+                $fieldValue = $arrLine[$k];
 
                 // trim quotes
-                $fieldContent = $this->myTrim($fieldContent);
+                $fieldValue = $this->myTrim($fieldValue);
 
                 // convert variable to a string (see #2)
-                $fieldContent = strval($fieldContent);
+                $fieldValue = strval($fieldValue);
 
                 // get the DCA of the current field
                 $arrDCA =  &$GLOBALS['TL_DCA'][$strTable]['fields'][$fieldname];
@@ -151,30 +151,57 @@ class ImportFromCsv extends \Backend
                 }
                 $strClass = &$GLOBALS['TL_FFL'][$inputType];
 
-
+                
                 // HOOK: add custom validation
                 if (isset($GLOBALS['TL_HOOKS']['importFromCsv']) && is_array($GLOBALS['TL_HOOKS']['importFromCsv']))
                 {
+                    $arrCustomValidation = array(
+                        'validation'    => false,
+                        'hasErrors'     => false,
+                        'errorMsg'      => false,
+                        'doNotSave'     => false,
+                        'strTable'      => $strTable,
+                        'arrDCA'        => $arrDCA,
+                        'fieldname'     => $fieldname,
+                        'value'         => $fieldValue,
+                        'arrayLine'     => $assocArrayLine
+                    );
+
                     foreach ($GLOBALS['TL_HOOKS']['importFromCsv'] as $callback)
                     {
-                        $customValidation = true;
+                        $blnCustomValidation = true;
                         $this->import($callback[0]);
-                        $fieldContent = $this->$callback[0]->$callback[1]($strTable, $arrDCA, $fieldname, $fieldContent, $assocArray, $this);
+                        $arrCustomValidation = $this->$callback[0]->$callback[1]($arrCustomValidation, $this);
+                        if(!is_array($arrCustomValidation))
+                        {
+                            die('Als Rückgabewert wird ein Array erwartet. Fehler in ' . __FILE__ . ' in Zeile ' . __LINE__ . '.');
+                        }
+                        $fieldValue = $arrCustomValidation['value'];
+                    }
+
+                    if($arrCustomValidation['errorMsg'] != '')
+                    {
+                        $fieldValue = sprintf('<span class="errMsg">%s</span>', $arrCustomValidation['errorMsg']);
+                    }
+
+                    if($arrCustomValidation['doNotSave'])
+                    {
+                        $doNotSave = true;
                     }
                 }
 
                 // Continue if the class does not exist
                 // Use form widgets for input validation
-                if (class_exists($strClass) && $customValidation === false)
+                if (class_exists($strClass) && $blnCustomValidation === false)
                 {
-                    $objWidget = new $strClass($strClass::getAttributesFromDca($arrDCA, $fieldname, $fieldContent, '', '', $this));
+                    $objWidget = new $strClass($strClass::getAttributesFromDca($arrDCA, $fieldname, $fieldValue, '', '', $this));
                     $objWidget->storeValues = false;
 
                     // Set post var, so the content can be validated
-                    \Input::setPost($fieldname, $fieldContent);
+                    \Input::setPost($fieldname, $fieldValue);
                     if ($fieldname == 'password')
                     {
-                        \Input::setPost('password_confirm', $fieldContent);
+                        \Input::setPost('password_confirm', $fieldValue);
                     }
 
                     // add option values in the csv like this: value1||value2||value3
@@ -185,41 +212,41 @@ class ImportFromCsv extends \Backend
                             // Security issues in Contao #6695
                             if (version_compare(VERSION . BUILD, '3.2.5', '>='))
                             {
-                                $fieldContent = explode($arrDelim, $fieldContent);
+                                $fieldValue = explode($arrDelim, $fieldValue);
                             }
                             else
                             {
-                                $fieldContent = serialize(explode($arrDelim, $fieldContent));
+                                $fieldValue = serialize(explode($arrDelim, $fieldValue));
                             }
 
-                            \Input::setPost($fieldname, $fieldContent);
-                            $objWidget->value = $fieldContent;
+                            \Input::setPost($fieldname, $fieldValue);
+                            $objWidget->value = $fieldValue;
                         }
                     }
 
                     // validate input
                     $objWidget->validate();
 
-                    $fieldContent = $objWidget->value;
+                    $fieldValue = $objWidget->value;
 
                     // Convert date formats into timestamps
                     $rgxp = $arrDCA['eval']['rgxp'];
-                    if (($rgxp == 'date' || $rgxp == 'time' || $rgxp == 'datim') && $fieldContent != '' && !$objWidget->hasErrors())
+                    if (($rgxp == 'date' || $rgxp == 'time' || $rgxp == 'datim') && $fieldValue != '' && !$objWidget->hasErrors())
                     {
                         try
                         {
                             $strTimeFormat = $GLOBALS['TL_CONFIG'][$rgxp . 'Format'];
-                            $objDate = new \Date($fieldContent, $strTimeFormat);
-                            $fieldContent = $objDate->tstamp;
+                            $objDate = new \Date($fieldValue, $strTimeFormat);
+                            $fieldValue = $objDate->tstamp;
                         }
                         catch (\OutOfBoundsException $e)
                         {
-                            $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['invalidDate'], $fieldContent));
+                            $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['invalidDate'], $fieldValue));
                         }
                     }
 
                     // Make sure that unique fields are unique
-                    if ($arrDCA['eval']['unique'] && $fieldContent != '' && !$this->Database->isUniqueValue($strTable, $fieldname, $fieldContent, null))
+                    if ($arrDCA['eval']['unique'] && $fieldValue != '' && !$this->Database->isUniqueValue($strTable, $fieldname, $fieldValue, null))
                     {
                         $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['unique'], $arrDCA['label'][0] ?: $fieldname));
                     }
@@ -228,20 +255,21 @@ class ImportFromCsv extends \Backend
                     if ($objWidget->hasErrors())
                     {
                         $doNotSave = true;
-                        $fieldContent = sprintf('"%s" => <span class="errMsg">%s</span>', $fieldContent, $objWidget->getErrorsAsString());
+                        $fieldValue = sprintf('"%s" => <span class="errMsg">%s</span>', $fieldValue, $objWidget->getErrorsAsString());
                     }
                     else
                     {
                         // Set the correct empty value
-                        if ($fieldContent === '')
+                        if ($fieldValue === '')
                         {
-                            $fieldContent = $objWidget->getEmptyValue();
+                            $fieldValue = $objWidget->getEmptyValue();
                         }
                     }
                 }
 
-                $set[$fieldname] = is_array($fieldContent) ? serialize($fieldContent) : $fieldContent;
+                $set[$fieldname] = is_array($fieldValue) ? serialize($fieldValue) : $fieldValue;
             }
+
 
             // insert data record
             if (!$doNotSave)
