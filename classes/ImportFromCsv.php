@@ -164,7 +164,9 @@ class ImportFromCsv extends \Backend
                         'arrDCA'        => $arrDCA,
                         'fieldname'     => $fieldname,
                         'value'         => $fieldValue,
-                        'arrayLine'     => $assocArrayLine
+                        'arrayLine'     => $assocArrayLine,
+                        'line'          => $line,
+                        'objCsvFile'    => $objCsvFile
                     );
 
                     foreach ($GLOBALS['TL_HOOKS']['importFromCsv'] as $callback)
@@ -174,7 +176,7 @@ class ImportFromCsv extends \Backend
                         $arrCustomValidation = $this->$callback[0]->$callback[1]($arrCustomValidation, $this);
                         if(!is_array($arrCustomValidation))
                         {
-                            die('Als Rückgabewert wird ein Array erwartet. Fehler in ' . __FILE__ . ' in Zeile ' . __LINE__ . '.');
+                            die('Als RÃ¼ckgabewert wird ein Array erwartet. Fehler in ' . __FILE__ . ' in Zeile ' . __LINE__ . '.');
                         }
                         $fieldValue = $arrCustomValidation['value'];
                     }

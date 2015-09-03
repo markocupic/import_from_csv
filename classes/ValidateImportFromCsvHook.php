@@ -43,6 +43,8 @@ class ValidateImportFromCsvHook extends \System
             'hasErrors'     => 'Should be set to true if validation fails.',
             'errorMsg'      => 'Define a custom text message if validation fails.',
             'doNotSave'     => 'Set this item to true if you don't want to save the value into the database.',
+            'line'          => 'current line in the csv-spreadsheet',
+            'objCsvFile'    => 'the Contao file object'
         );
         */
 

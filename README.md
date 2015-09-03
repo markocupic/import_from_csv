@@ -106,7 +106,9 @@ class MyValidateImportFromCsvHook extends \System
         // $arrCustomValidation['arrayLine'] -> Contains the current line/dataset as associative array.
         // $arrCustomValidation['hasErrors'] -> Should be set to true if validation fails.
         // $arrCustomValidation['errorMsg']  -> Define a custom error message if validation fails.
-        // $arrCustomValidation['doNotSave'] -> Set this item to true if you don't want to save the value into the database.
+        // $arrCustomValidation['line']      -> current line in the csv-spreadsheet
+        // $arrCustomValidation['objCsvFile']-> csv-file in the form of a Contao file object
+
 
 
         // tl_member
