@@ -1,4 +1,4 @@
-firstname;lastname;dateOfBirth;gender;company;street;postal;city;state;country;phone;mobile;fax;email;website;language;login;username;password;groups
-Aans;Meier;29.05.1878;male;Webdesign AG;Falkenweg 2;4564;Entenhausen;Kanton Luzern;ch;041 921 99 99;079 620 99 91;045 789 56 89;aaa@bb.ch;www.me.ch;de;1;aaaalfonsfrey;topsecret;3||4
-AFritz;Nimmersatt;29.05.1839;male;Webdesign AG;Falkenweg 3;4565;Storchhausen;Kanton Luzern;ch;042 921 99 99;080 620 99 91;46 789 56 89;bbb@bb.ch;www.mee.ch;de;1;aafritznimmer;topsecret2;3||5||6
-Aina;Meile;29.05.1800;female;Webdesign AG;Falkenweg 4;4566;Schwanensee;Kanton Luzern;ch;043 921 99 99;081 620 99 91;47 789 56 89;ccc@bb.ch;www.meee.ch;de;0;aaaaaaninameile;topsecret3;3||6
+firstname;lastname;dateOfBirth;gender;company;street;postal;city;state;country;phone;mobile;fax;email;website;language;login;username;password;groups;geolocation
+Hans;Meier;29.05.1878;male;Webdesign AG;Surenweidstrasse 2;6208;Oberkirch;Kanton Luzern;ch;041 921 99 99;079 620 99 91;045 789 56 89;aaa@bb.ch;www.me.ch;de;1;hansmeier;topsecret;3||4;
+Fritz;Nimmersatt;29.05.1839;male;Webdesign AG;Surenweidstrasse 10;6208;Oberkirch;Kanton Luzern;ch;041 921 99 99;079 620 99 91;046 789 56 89;bbb@bb.ch;www.mee.ch;de;1;fritznimmer;topsecret2;3||5||6;
+Aina;Meile;29.05.1800;female;Webdesign AG;Surenweidstrasse 2;6208;Oberkirch;Kanton Luzern;ch;043 921 99 99;079 620 99 91;047 789 56 89;ccc@bb.ch;www.meee.ch;de;0;aninameile;topsecret3;3||6;
