@@ -47,7 +47,8 @@ system/modules/my_import_from_csv_hook/
         config.php
         autoload.php
         autoload.ini
-    classes/MyValidateImportFromCsv.php
+    classes/
+        MyValidateImportFromCsv.php
 
 
 In die config.php schreibt man folgendes:
