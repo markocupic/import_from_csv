@@ -68,7 +68,7 @@ In die ValidateImportFromCsv.php schreiben Sie folgendes. In die addGeolocation(
 
 /**
  * Contao Open Source CMS
- * Copyright (C) 2005-2012 Leo Feyer
+ * Copyright (C) 2005-2014 Leo Feyer
  * @package import_from_csv
  * @author Marko Cupic 2014, extension sponsered by Rainer-Maria Fritsch - Fast-Doc UG, Berlin
  * @link https://github.com/markocupic/import_from_csv
@@ -86,8 +86,6 @@ namespace MCupic;
  * @author Marko Cupic <m.cupic@gmx.ch>
  * @package import_from_csv
  */
-
-
 class ValidateImportFromCsvHook extends \System
 {
 
