@@ -32,12 +32,15 @@ Kontrollieren Sie, ob in der csv-Datei die Feldinhalte noch zusätzlich von eine
 Legen Sie fest, ob die Datensätze aus der csv-Datei in der Zieltabelle angehängt werden oder die Zieltabelle vorher geleert werden soll (alter table). Achtung! Gelöschte Datensätze lassen sich, wenn kein Backup vorhanden, nicht mehr wiederherstellen.
 
 ### Datei auswählen (Pflichtfeld)
+
 Abschliessend wählen Sie die Datei aus, von der in die Datenbank geschrieben werden soll.
 Tipp: Wenn Sie die Datei ausgewählt haben, klicken Sie voher auf "Speichern" und Sie kriegen eine Vorschau.
 
 ## Importmechanismus über Hook anpassen
 
-Mit einem updatesicheren Hook lässt sich die Validierung umgehen oder anpassen. Erstellen Sie dafür folgende Ordner und Dateistruktur:
+Mit einem updatesicheren Hook lässt sich die Validierung umgehen oder anpassen. Im folgenden Beispiel sollen die Geokoordinaten beim Import anhand von Strasse, Stadt und Länderkürzel automatisch per Curl-Request von GoogleMaps bezogen werden. Die Koordinaten werden danach in $arrCustomValidation['value'] gespeichert und das Array am Ende der Methode als Methodenrückgabewert zurückgegeben. Auch lassen sich Fehlermeldungen generieren, wenn z.B. keine Geokoordinaten ermittelt werden konnten. Dadurch wird der Datensatz übersprungen und nicht in die Datenbank geschrieben.
+
+Um einen Hook zu nutzen, erstellen Sie folgende Ordner und Dateistruktur:
 
 system/modules/my_import_from_csv_hook/
     config/
