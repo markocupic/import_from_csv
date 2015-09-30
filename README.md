@@ -43,11 +43,17 @@ Mit einem updatesicheren Hook lässt sich die Validierung umgehen oder anpassen.
 Um einen Hook zu nutzen, erstellen Sie folgende Ordner und Dateistruktur:
 
 system/modules/my_import_from_csv_hook/
+
     config/
+
         config.php
+
         autoload.php
+
         autoload.ini
+
     classes/
+    
         MyValidateImportFromCsv.php
 
 
