@@ -56,12 +56,12 @@ In die config.php schreibt man folgendes:
  */
 if (TL_MODE == 'BE' && \Input::get('do') == 'import_from_csv')
 {
-    $GLOBALS['TL_HOOKS']['importFromCsv'][] = array('MyValidateImportFromCsv', 'myValidate');
+    $GLOBALS['TL_HOOKS']['importFromCsv'][] = array('ValidateImportFromCsv', 'addGeolocation');
 }
 
 ```
 
-In die MyValidateImportFromCsv.php schreiben Sie folgendes. In die myValidate()-Methode scheiben Sie Ihren Validierungslogik. Die Methode erwartet 2 Parameter und gibt als Rückgabewert ein assoziatives Array mit Feldwert, Fehlermeldung, etc. zurück.
+In die ValidateImportFromCsv.php schreiben Sie folgendes. In die addGeolocation()-Methode scheiben Sie Ihren Validierungslogik. Die Methode erwartet 2 Parameter und gibt als Rückgabewert ein assoziatives Array mit Feldwert, Fehlermeldung, etc. zurück.
 
 ```php
 <?php
@@ -81,14 +81,14 @@ In die MyValidateImportFromCsv.php schreiben Sie folgendes. In die myValidate()-
 namespace MCupic;
 
 /**
- * Class MyValidateImportFromCsv
+ * Class MyValidateImportFromCsvHook
  * Copyright: 2014 Marko Cupic Sponsor der Erweiterung: Fast-Doc UG, Berlin
  * @author Marko Cupic <m.cupic@gmx.ch>
  * @package import_from_csv
  */
 
 
-class MyValidateImportFromCsvHook extends \System
+class ValidateImportFromCsvHook extends \System
 {
 
     /**
@@ -96,47 +96,94 @@ class MyValidateImportFromCsvHook extends \System
      * @param null $objBackendModule
      * @return array
      */
-    public function myValidate($arrCustomValidation, $objBackendModule = null)
+    public function addGeolocation($arrCustomValidation, $objBackendModule = null)
     {
-
-        // $arrCustomValidation['strTable']  -> Contains the tableanme.
-        // $arrCustomValidation['arrDCA']    -> Datacontainer array (DCA) of the current field
-        // $arrCustomValidation['fieldname'] -> Contains the fieldname.
-        // $arrCustomValidation['value']     -> Contains the value.
-        // $arrCustomValidation['arrayLine'] -> Contains the current line/dataset as associative array.
-        // $arrCustomValidation['hasErrors'] -> Should be set to true if validation fails.
-        // $arrCustomValidation['errorMsg']  -> Define a custom error message if validation fails.
-        // $arrCustomValidation['line']      -> current line in the csv-spreadsheet
-        // $arrCustomValidation['objCsvFile']-> csv-file in the form of a Contao file object
-
-
+        /**
+         * $arrCustomValidation = array(
+         *
+         * 'strTable'      => 'tablename',
+         * 'arrDCA'        => 'Datacontainer array (DCA) of the current field.',
+         * 'fieldname'     => 'fieldname',
+         * 'value'         => 'value',
+         * 'arrayLine'     => 'Contains the current line/dataset as associative array.',
+         * 'hasErrors'     => 'Should be set to true if validation fails.',
+         * 'errorMsg'      => 'Define a custom text message if validation fails.',
+         * 'doNotSave'     => 'Set this item to true if you don't want to save the value into the database.',
+         * 'line'          => 'current line in the csv-spreadsheet',
+         * 'objCsvFile'    => 'the Contao file object'
+         * );
+         */
 
         // tl_member
         if ($arrCustomValidation['strTable'] == 'tl_member')
         {
-
-            if ($arrCustomValidation['fieldname'] == 'firstname')
+            // Get geolocation from a given address
+            if ($arrCustomValidation['fieldname'] == 'geolocation')
             {
-                if($arrCustomValidation['value'] != 'Bruce')
+                $strStreet = $arrCustomValidation['arrayLine']['street'];
+                $strCity = $arrCustomValidation['arrayLine']['city'];
+                $strCountry = $arrCustomValidation['arrayLine']['country'];
+
+                $strStreet = str_replace(' ', '+', $strStreet);
+                $strCity = str_replace(' ', '+', $strCity);
+                $strAddress = $strStreet . ',+' . $strCity . ',+' . $strCountry;
+
+                $arrPos = self::curlGetCoordinates(sprintf('http://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=false', $strAddress));
+
+                if (is_array($arrPos[results][0]['geometry']))
                 {
-                    $arrCustomValidation['hasErrors'] = true;
-                    $arrCustomValidation['errorMsg'] = "Firstname must be 'Bruce'! '" . $arrCustomValidation['value'] . "' given.";
-                    $arrCustomValidation['doNotSave'] = true;
+                    $latPos = $arrPos[results][0]['geometry']['location']['lat'];
+                    $lngPos = $arrPos[results][0]['geometry']['location']['lng'];
+
+                    // Save geolocation in $arrCustomValidation['value']
+                    $arrCustomValidation['value'] = $latPos . ',' . $lngPos;
                 }
-            }
-
-            if ($arrCustomValidation['fieldname'] == 'lastname')
-            {
-                if($arrCustomValidation['value'] != 'Springsteen')
+                else
                 {
+                    // Error handling
                     $arrCustomValidation['hasErrors'] = true;
-                    $arrCustomValidation['errorMsg'] = "Lastname must be 'Springsteen'! '" . $arrCustomValidation['value'] . "' given.";
+                    $arrCustomValidation['errorMsg'] = "Setting geolocation for '" . $strAddress . "' failed!";
                     $arrCustomValidation['doNotSave'] = true;
                 }
             }
         }
 
         return $arrCustomValidation;
+    }
+
+
+    /**
+     * Curl helper method
+     * @param string $url
+     * @return array
+     */
+    public static function curlGetCoordinates($url)
+    {
+        // is cURL installed yet?
+        if (!function_exists('curl_init'))
+        {
+            die('Sorry cURL is not installed!');
+        }
+
+        // OK cool - then let's create a new cURL resource handle
+        $ch = curl_init();
+
+        // Set URL to download
+        curl_setopt($ch, CURLOPT_URL, $url);
+
+        // Should cURL return or print out the data? (true = return, false = print)
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        // Timeout in seconds
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+        // Download the given URL, and return output
+        $arrOutput = json_decode(curl_exec($ch), true);
+
+        // Close the cURL resource, and free system resources
+        curl_close($ch);
+
+        return $arrOutput;
     }
 }
 
