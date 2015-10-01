@@ -73,7 +73,7 @@ class ImportFromCsv extends \Backend
             return;
         }
 
-        //get content as array
+        // get content as array
         $arrFileContent = $objCsvFile->getContentAsArray();
         $arrFieldnames = explode($this->arrData['fieldSeparator'], $arrFileContent[0]);
 
@@ -131,6 +131,9 @@ class ImportFromCsv extends \Backend
                 // get the field content
                 $fieldValue = $arrLine[$k];
 
+
+
+
                 // trim quotes
                 $fieldValue = $this->myTrim($fieldValue);
 
@@ -144,6 +147,8 @@ class ImportFromCsv extends \Backend
                 // Prepare FormWidget object !set inputType to "text" if there is no definition
                 $inputType = $arrDCA['inputType'] != '' ? $arrDCA['inputType'] : 'text';
 
+
+
                 // Map checkboxWizards to regular checkbox widgets
                 if ($inputType == 'checkboxWizard')
                 {
@@ -151,27 +156,26 @@ class ImportFromCsv extends \Backend
                 }
                 $strClass = &$GLOBALS['TL_FFL'][$inputType];
 
-                
                 // HOOK: add custom validation
                 if (isset($GLOBALS['TL_HOOKS']['importFromCsv']) && is_array($GLOBALS['TL_HOOKS']['importFromCsv']))
                 {
                     $arrCustomValidation = array(
-                        'validation'    => false,
-                        'hasErrors'     => false,
-                        'errorMsg'      => false,
-                        'doNotSave'     => false,
-                        'strTable'      => $strTable,
-                        'arrDCA'        => $arrDCA,
-                        'fieldname'     => $fieldname,
-                        'value'         => $fieldValue,
-                        'arrayLine'     => $assocArrayLine,
-                        'line'          => $line,
-                        'objCsvFile'    => $objCsvFile
+                        'strTable'              => $strTable,
+                        'arrDCA'                => $arrDCA,
+                        'fieldname'             => $fieldname,
+                        'value'                 => $fieldValue,
+                        'arrayLine'             => $assocArrayLine,
+                        'line'                  => $line,
+                        'objCsvFile'            => $objCsvFile,
+                        'skipWidgetValidation'  => false,
+                        'hasErrors'             => false,
+                        'errorMsg'              => null,
+                        'doNotSave'             => false,
                     );
 
+                    $blnCustomValidation = false;
                     foreach ($GLOBALS['TL_HOOKS']['importFromCsv'] as $callback)
                     {
-                        $blnCustomValidation = true;
                         $this->import($callback[0]);
                         $arrCustomValidation = $this->$callback[0]->$callback[1]($arrCustomValidation, $this);
                         if(!is_array($arrCustomValidation))
@@ -179,6 +183,12 @@ class ImportFromCsv extends \Backend
                             die('Als Rückgabewert wird ein Array erwartet. Fehler in ' . __FILE__ . ' in Zeile ' . __LINE__ . '.');
                         }
                         $fieldValue = $arrCustomValidation['value'];
+
+                        // Check if widget-validation should be skipped
+                        if ($blnCustomValidation['skipWidgetValidation'] === true)
+                        {
+                            $blnCustomValidation = true;
+                        }
                     }
 
                     if($arrCustomValidation['errorMsg'] != '')

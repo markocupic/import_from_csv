@@ -38,16 +38,17 @@ class ImportFromCsvHookExample extends \System
         /**
          * $arrCustomValidation = array(
          *
-         * 'strTable'      => 'tablename',
-         * 'arrDCA'        => 'Datacontainer array (DCA) of the current field.',
-         * 'fieldname'     => 'fieldname',
-         * 'value'         => 'value',
-         * 'arrayLine'     => 'Contains the current line/dataset as associative array.',
-         * 'hasErrors'     => 'Should be set to true if validation fails.',
-         * 'errorMsg'      => 'Define a custom text message if validation fails.',
-         * 'doNotSave'     => 'Set this item to true if you don't want to save the value into the database.',
-         * 'line'          => 'current line in the csv-spreadsheet',
-         * 'objCsvFile'    => 'the Contao file object'
+         * 'strTable'               => 'tablename',
+         * 'arrDCA'                 => 'Datacontainer array (DCA) of the current field.',
+         * 'fieldname'              => 'fieldname',
+         * 'value'                  => 'value',
+         * 'arrayLine'              => 'Contains the current line/dataset as associative array.',
+         * 'line'                   => 'current line in the csv-spreadsheet',
+         * 'objCsvFile'             => 'the Contao file object'
+         * 'skipWidgetValidation'   => 'Skip widget-input-validation? (default is set to false)',
+         * 'hasErrors'              => 'Should be set to true if custom validation fails. (default is set to false)',
+         * 'errorMsg'               => 'Define a custom text message if custom validation fails.',
+         * 'doNotSave'              => 'Set this item to true if you don't want to save the datarecord into the database. (default is set to false)',
          * );
          */
 
@@ -57,6 +58,10 @@ class ImportFromCsvHookExample extends \System
             // Get geolocation from a given address
             if ($arrCustomValidation['fieldname'] == 'geolocation')
             {
+
+                // Do custom validation and skip the Contao-Widget-Input-Validation
+                $arrCustomValidation['skipWidgetValidation'] = true;
+
                 $strStreet = $arrCustomValidation['arrayLine']['street'];
                 $strCity = $arrCustomValidation['arrayLine']['city'];
                 $strCountry = $arrCustomValidation['arrayLine']['country'];
@@ -85,7 +90,7 @@ class ImportFromCsvHookExample extends \System
                     }
                     else
                     {
-                        $arrCustomValidation['errorMsg'] = "Setting geolocation for '" . $strAddress . "' failed!";
+                        $arrCustomValidation['errorMsg'] = sprintf("Setting geolocation for (%s) failed!", $strAddress);
                     }
                     $arrCustomValidation['hasErrors'] = true;
                     $arrCustomValidation['doNotSave'] = true;
