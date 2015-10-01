@@ -5,9 +5,7 @@
  *
  * Copyright (c) 2005-2015 Leo Feyer
  *
- * @package Import_from_csv
- * @link    https://contao.org
- * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
+ * @license LGPL-3.0+
  */
 
 
@@ -26,9 +24,9 @@ ClassLoader::addNamespaces(array
 ClassLoader::addClasses(array
 (
 	// Classes
-	'MCupic\ValidateImportFromCsvHook' => 'system/modules/import_from_csv/classes/ValidateImportFromCsvHook.php',
-	'MCupic\ImportFromCsv'               => 'system/modules/import_from_csv/classes/ImportFromCsv.php',
+	'MCupic\ImportFromCsvHookExample' => 'system/modules/import_from_csv/classes/ImportFromCsvHookExample.php',
+	'MCupic\ImportFromCsv'            => 'system/modules/import_from_csv/classes/ImportFromCsv.php',
 
 	// Models
-	'MCupic\ImportFromCsvModel'          => 'system/modules/import_from_csv/models/ImportFromCsvModel.php',
+	'MCupic\ImportFromCsvModel'       => 'system/modules/import_from_csv/models/ImportFromCsvModel.php',
 ));

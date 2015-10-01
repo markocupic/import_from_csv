@@ -2,7 +2,7 @@
 
 /**
  * Contao Open Source CMS
- * Copyright (C) 2005-2012 Leo Feyer
+ * Copyright (C) 2005-2014 Leo Feyer
  * @package import_from_csv
  * @author Marko Cupic 2014, extension sponsered by Rainer-Maria Fritsch - Fast-Doc UG, Berlin
  * @link https://github.com/markocupic/import_from_csv
@@ -15,15 +15,18 @@
 namespace MCupic;
 
 /**
- * Class MyValidateImportFromCsvHook
+ * Class ImportFromCsvHookExample
  * Copyright: 2014 Marko Cupic Sponsor der Erweiterung: Fast-Doc UG, Berlin
  * @author Marko Cupic <m.cupic@gmx.ch>
  * @package import_from_csv
  */
-
-
-class ValidateImportFromCsvHook extends \System
+class ImportFromCsvHookExample extends \System
 {
+
+    /**
+     * cURL error messages
+     */
+    public $curlErrorMsg = null;
 
     /**
      * @param $arrCustomValidation
@@ -62,12 +65,13 @@ class ValidateImportFromCsvHook extends \System
                 $strCity = str_replace(' ', '+', $strCity);
                 $strAddress = $strStreet . ',+' . $strCity . ',+' . $strCountry;
 
-                $arrPos = self::curlGetCoordinates(sprintf('http://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=false', $strAddress));
+                // Get Position from GoogleMaps
+                $arrPos = $this->curlGetCoordinates(sprintf('http://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=false', $strAddress));
 
-                if (is_array($arrPos[results][0]['geometry']))
+                if (is_array($arrPos['results'][0]['geometry']))
                 {
-                    $latPos = $arrPos[results][0]['geometry']['location']['lat'];
-                    $lngPos = $arrPos[results][0]['geometry']['location']['lng'];
+                    $latPos = $arrPos['results'][0]['geometry']['location']['lat'];
+                    $lngPos = $arrPos['results'][0]['geometry']['location']['lng'];
 
                     // Save geolocation in $arrCustomValidation['value']
                     $arrCustomValidation['value'] = $latPos . ',' . $lngPos;
@@ -75,8 +79,15 @@ class ValidateImportFromCsvHook extends \System
                 else
                 {
                     // Error handling
+                    if ($this->curlErrorMsg != '')
+                    {
+                        $arrCustomValidation['errorMsg'] = $this->curlErrorMsg;
+                    }
+                    else
+                    {
+                        $arrCustomValidation['errorMsg'] = "Setting geolocation for '" . $strAddress . "' failed!";
+                    }
                     $arrCustomValidation['hasErrors'] = true;
-                    $arrCustomValidation['errorMsg'] = "Setting geolocation for '" . $strAddress . "' failed!";
                     $arrCustomValidation['doNotSave'] = true;
                 }
             }
@@ -87,18 +98,20 @@ class ValidateImportFromCsvHook extends \System
 
 
     /**
-     * @param string $url
-     * @return array
+     * Curl helper method
+     * @param $url
+     * @return bool|mixed
      */
-    public static function curlGetCoordinates($url)
+    public function curlGetCoordinates($url)
     {
-        // is cURL installed yet?
+        // is cURL installed on the webserver?
         if (!function_exists('curl_init'))
         {
-            die('Sorry cURL is not installed!');
+            $this->curlErrorMsg = 'Sorry cURL is not installed on your webserver!';
+            return false;
         }
 
-        // OK cool - then let's create a new cURL resource handle
+        // Create a new cURL resource handle
         $ch = curl_init();
 
         // Set URL to download
