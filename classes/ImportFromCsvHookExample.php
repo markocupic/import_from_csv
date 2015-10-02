@@ -116,6 +116,9 @@ class ImportFromCsvHookExample extends \System
             return false;
         }
 
+        // Set a timout to avoid the OVER_QUERY_LIMIT
+        usleep(25000);
+
         // Create a new cURL resource handle
         $ch = curl_init();
 
