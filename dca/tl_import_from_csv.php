@@ -149,8 +149,7 @@ class tl_import_from_csv extends Backend
 
         parent::__construct();
 
-        // $_POST['saveNcreate'] is the import button
-        if ($_POST['saveNcreate'] && $this->Input->post('FORM_SUBMIT') && $this->Input->post('SUBMIT_TYPE') != 'auto' && !$_SESSION['import_from_csv'])
+        if (isset($_POST['saveNcreate']) && $this->Input->post('FORM_SUBMIT') && $this->Input->post('SUBMIT_TYPE') != 'auto' && !$_SESSION['import_from_csv'])
         {
             unset($_POST['saveNcreate']);
             $this->initImport();
@@ -347,19 +346,28 @@ class tl_import_from_csv extends Backend
 
         if (Input::get('act') == 'edit')
         {
-            // remove saveNClose button
+            // Remove saveNClose button
+            // Contao 3
             $strContent = preg_replace('/<input type=\"submit\" name=\"saveNclose\"((\r|\n|.)+?)>/', '', $strContent);
+            // Contao 4
+            $strContent = preg_replace('/<button type=\"submit\" name=\"saveNclose\"((\r|\n|.)+?)>((\r|\n|.)+?)button>/', '', $strContent);
 
-            //rename buttons
-            $strContent = preg_replace('/<input type=\"submit\" name=\"save\" id=\"save\" class=\"tl_submit\" accesskey=\"s\" value=\"((\r|\n|.)+?)\">/', '<input type="submit" name="save" id="save" class="tl_submit" accesskey="s" value="' . $GLOBALS['TL_LANG']['MSC']['save'] . '">', $strContent);
+            // Rename saveNcreate button
+            // Contao 3
             $strContent = preg_replace('/<input type=\"submit\" name=\"saveNcreate\" id=\"saveNcreate\" class=\"tl_submit\" accesskey=\"n\" value=\"((\r|\n|.)+?)\">/', '<input type="submit" name="saveNcreate" id="saveNcreate" class="tl_submit importButton" accesskey="n" value="' . $GLOBALS['TL_LANG']['tl_import_from_csv']['launchImportButton'] . '">', $strContent);
+            // Contao 4
+            $strContent = preg_replace('/<button type=\"submit\" name=\"saveNcreate\"((\r|\n|.)+?)button>/', '<button type="submit" name="saveNcreate" id="saveNcreate" class="tl_submit importButton" accesskey="n">' . $GLOBALS['TL_LANG']['tl_import_from_csv']['launchImportButton'] . '</button>', $strContent);
 
-
+            // Remove buttons in reportTable view
             if (strstr($strContent, 'reportTable'))
             {
+                // Contao 3
                 $strContent = preg_replace('/<input type=\"submit\" name=\"save\"((\r|\n|.)+?)>/', '', $strContent);
-                $strContent = preg_replace('/<input type=\"submit\" name=\"saveNclose\"((\r|\n|.)+?)>/', '', $strContent);
                 $strContent = preg_replace('/<input type=\"submit\" name=\"saveNcreate\"((\r|\n|.)+?)>/', '', $strContent);
+
+                // Contao 4
+                $strContent = preg_replace('/<button type=\"submit\" name=\"save\"((\r|\n|.)+?)button>/', '', $strContent);
+                $strContent = preg_replace('/<button type=\"submit\" name=\"saveNcreate\"((\r|\n|.)+?)button>/', '', $strContent);
             }
         }
 
