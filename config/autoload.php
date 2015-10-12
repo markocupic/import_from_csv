@@ -24,8 +24,8 @@ ClassLoader::addNamespaces(array
 ClassLoader::addClasses(array
 (
 	// Classes
-	'MCupic\ImportFromCsvHookExample' => 'system/modules/import_from_csv/classes/ImportFromCsvHookExample.php',
-	'MCupic\ImportFromCsv'            => 'system/modules/import_from_csv/classes/ImportFromCsv.php',
+	'MCupic\\ImportFromCsv\ImportFromCsvHookExample' => 'system/modules/import_from_csv/classes/ImportFromCsvHookExample.php',
+	'MCupic\\ImportFromCsv\ImportFromCsv'            => 'system/modules/import_from_csv/classes/ImportFromCsv.php',
 
 	// Models
 	'MCupic\ImportFromCsvModel'       => 'system/modules/import_from_csv/models/ImportFromCsvModel.php',

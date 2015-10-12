@@ -66,7 +66,7 @@ In die config.php schreibt man folgendes:
  */
 if (TL_MODE == 'BE' && \Input::get('do') == 'import_from_csv')
 {
-    $GLOBALS['TL_HOOKS']['importFromCsv'][] = array('ValidateImportFromCsv', 'addGeolocation');
+    $GLOBALS['TL_HOOKS']['importFromCsv'][] = array('MCupic\ImportFromCsv\ValidateImportFromCsv', 'addGeolocation');
 }
 
 ```
@@ -88,7 +88,7 @@ In die ValidateImportFromCsv.php schreiben Sie folgendes. In die addGeolocation(
 /**
  * Run in a custom namespace, so the class can be replaced
  */
-namespace MCupic;
+namespace MCupic\ImportFromCsv;
 
 /**
  * Class ImportFromCsvHookExample

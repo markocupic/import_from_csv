@@ -189,7 +189,7 @@ class tl_import_from_csv extends Backend
             $objFile = new File($objFile->path);
             if (strtolower($objFile->extension) == 'csv')
             {
-                $objImport = new ImportFromCsv;
+                $objImport = new MCupic\ImportFromCsv\ImportFromCsv;
                 $objImport->importCsv($objFile, $strTable, $importMode, $arrSelectedFields, $strFieldseparator, $strFieldenclosure, 'id', '||');
             }
         }
