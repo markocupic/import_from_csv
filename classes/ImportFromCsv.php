@@ -35,7 +35,7 @@ class ImportFromCsv extends \Backend
 
 
     /**
-     * @param $objCsvFile
+     * @param \File $objCsvFile
      * @param $strTable
      * @param $strImportMode
      * @param null $arrSelectedFields
@@ -44,7 +44,7 @@ class ImportFromCsv extends \Backend
      * @param string $strPrimaryKey
      * @param string $arrDelim
      */
-    public function importCsv($objCsvFile, $strTable, $strImportMode, $arrSelectedFields = null, $strFieldseparator = ';', $strFieldenclosure = '', $strPrimaryKey = 'id', $arrDelim = '||')
+    public function importCsv(\File $objCsvFile, $strTable, $strImportMode, $arrSelectedFields = null, $strFieldseparator = ';', $strFieldenclosure = '', $strPrimaryKey = 'id', $arrDelim = '||')
     {
         // store sucess or failure message in the session
         $_SESSION['import_from_csv']['report'] = array();
@@ -174,7 +174,7 @@ class ImportFromCsv extends \Backend
                     foreach ($GLOBALS['TL_HOOKS']['importFromCsv'] as $callback)
                     {
                         $this->import($callback[0]);
-                        $arrCustomValidation = $this->$callback[0]->$callback[1]($arrCustomValidation, $this);
+                        $arrCustomValidation = $this->{$callback[0]}->{$callback[1]($arrCustomValidation, $this)};
                         if (!is_array($arrCustomValidation))
                         {
                             die('Als Rückgabewert wird ein Array erwartet. Fehler in ' . __FILE__ . ' in Zeile ' . __LINE__ . '.');
@@ -252,7 +252,7 @@ class ImportFromCsv extends \Backend
                             $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['invalidDate'], $fieldValue));
                         }
                     }
-
+ 
                     // Make sure that unique fields are unique
                     if ($arrDCA['eval']['unique'] && $fieldValue != '' && !$this->Database->isUniqueValue($strTable, $fieldname, $fieldValue, null))
                     {
@@ -325,7 +325,7 @@ class ImportFromCsv extends \Backend
                 {
                     // insert entry into database
                     $this->Database->prepare('INSERT INTO ' . $strTable . ' %s')->set($set)->execute();
-                } catch (Exception $e)
+                } catch (\Exception $e)
                 {
                     $set['insertError'] = $e->getMessage();
                     $doNotSave = true;
@@ -354,7 +354,7 @@ class ImportFromCsv extends \Backend
                 {
                     $v = serialize($v);
                 }
-                $htmlReport .= sprintf('<tr class="%s"><td>%s</td><td>%s</td></tr>', $cssClass, \String::substr($k, 30), \String::substrHtml($v, 90));
+                $htmlReport .= sprintf('<tr class="%s"><td>%s</td><td>%s</td></tr>', $cssClass, \StringUtil::substr($k, 30), \StringUtil::substrHtml($v, 90));
             }
 
 
