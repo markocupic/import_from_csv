@@ -57,9 +57,12 @@ class ImportFromCsv extends \Backend
 
         // store the options in $this->arrData
         $this->arrData = array(
-            'tablename' => $strTable, 'primaryKey' => $strPrimaryKey, 'importMode' => $strImportMode,
+            'tablename'      => $strTable,
+            'primaryKey'     => $strPrimaryKey,
+            'importMode'     => $strImportMode,
             'selectedFields' => is_array($arrSelectedFields) ? $arrSelectedFields : array(),
-            'fieldSeparator' => $strFieldseparator, 'fieldEnclosure' => $strFieldenclosure,
+            'fieldSeparator' => $strFieldseparator,
+            'fieldEnclosure' => $strFieldenclosure,
         );
 
         // truncate table
@@ -157,17 +160,17 @@ class ImportFromCsv extends \Backend
                 if (isset($GLOBALS['TL_HOOKS']['importFromCsv']) && is_array($GLOBALS['TL_HOOKS']['importFromCsv']))
                 {
                     $arrCustomValidation = array(
-                        'strTable' => $strTable,
-                        'arrDCA' => $arrDCA,
-                        'fieldname' => $fieldname,
-                        'value' => $fieldValue,
-                        'arrayLine' => $assocArrayLine,
-                        'line' => $line,
-                        'objCsvFile' => $objCsvFile,
+                        'strTable'             => $strTable,
+                        'arrDCA'               => $arrDCA,
+                        'fieldname'            => $fieldname,
+                        'value'                => $fieldValue,
+                        'arrayLine'            => $assocArrayLine,
+                        'line'                 => $line,
+                        'objCsvFile'           => $objCsvFile,
                         'skipWidgetValidation' => false,
-                        'hasErrors' => false,
-                        'errorMsg' => null,
-                        'doNotSave' => false,
+                        'hasErrors'            => false,
+                        'errorMsg'             => null,
+                        'doNotSave'            => false,
                     );
 
                     $blnCustomValidation = false;
@@ -182,7 +185,7 @@ class ImportFromCsv extends \Backend
                         $fieldValue = $arrCustomValidation['value'];
 
                         // Check if widget-validation should be skipped
-                        if ($blnCustomValidation['skipWidgetValidation'] === true)
+                        if ($arrCustomValidation['skipWidgetValidation'] === true)
                         {
                             $blnCustomValidation = true;
                         }
@@ -252,7 +255,7 @@ class ImportFromCsv extends \Backend
                             $objWidget->addError(sprintf($GLOBALS['TL_LANG']['ERR']['invalidDate'], $fieldValue));
                         }
                     }
- 
+
                     // Make sure that unique fields are unique
                     if ($arrDCA['eval']['unique'] && $fieldValue != '' && !$this->Database->isUniqueValue($strTable, $fieldname, $fieldValue, null))
                     {
@@ -306,8 +309,7 @@ class ImportFromCsv extends \Backend
                     foreach (deserialize($set['newsletter'], true) as $newsletterId)
                     {
                         // check for unique email-address
-                        $objRecipient = $this->Database->prepare("SELECT * FROM tl_newsletter_recipients WHERE email=? AND pid=(SELECT pid FROM tl_newsletter_recipients WHERE id=?) AND id!=?")
-                            ->execute($set['email'], $newsletterId, $newsletterId);
+                        $objRecipient = $this->Database->prepare("SELECT * FROM tl_newsletter_recipients WHERE email=? AND pid=(SELECT pid FROM tl_newsletter_recipients WHERE id=?) AND id!=?")->execute($set['email'], $newsletterId, $newsletterId);
 
                         if (!$objRecipient->numRows)
                         {
@@ -363,9 +365,9 @@ class ImportFromCsv extends \Backend
         }
 
         $_SESSION['import_from_csv']['status'] = array(
-            'rows' => $rows,
+            'rows'    => $rows,
             'success' => $rows - $insertError,
-            'errors' => $insertError
+            'errors'  => $insertError,
         );
     }
 
