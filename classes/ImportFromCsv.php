@@ -157,6 +157,7 @@ class ImportFromCsv extends \Backend
                 $strClass = &$GLOBALS['TL_FFL'][$inputType];
 
                 // HOOK: add custom validation
+                $errorMessage = null;
                 if (isset($GLOBALS['TL_HOOKS']['importFromCsv']) && is_array($GLOBALS['TL_HOOKS']['importFromCsv']))
                 {
                     $arrCustomValidation = array(
@@ -193,7 +194,8 @@ class ImportFromCsv extends \Backend
 
                     if ($arrCustomValidation['errorMsg'] != '')
                     {
-                        $fieldValue = sprintf('<span class="errMsg">%s</span>', $arrCustomValidation['errorMsg']);
+                        $fieldValue = $arrCustomValidation['errorMsg'];
+                        $doNotSave = true;
                     }
 
                     if ($arrCustomValidation['doNotSave'])
@@ -238,6 +240,7 @@ class ImportFromCsv extends \Backend
 
                     // validate input
                     $objWidget->validate();
+
 
                     $fieldValue = $objWidget->value;
 
