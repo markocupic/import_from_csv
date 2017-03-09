@@ -3,7 +3,7 @@
  * Contao Open Source CMS
  * Copyright (C) 2005-2012 Leo Feyer
  * @package import_from_csv
- * @author Marko Cupic 2014, extension sponsered by Rainer-Maria Fritsch - Fast-Doc UG, Berlin
+ * @author Marko Cupic 2017, extension sponsered by Rainer-Maria Fritsch - Fast-Doc UG, Berlin
  * @link    http://www.contao.org
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
  * @link https://github.com/markocupic/import_from_csv
@@ -149,10 +149,22 @@ class tl_import_from_csv extends Backend
 
         parent::__construct();
 
-        if (isset($_POST['saveNcreate']) && $this->Input->post('FORM_SUBMIT') && $this->Input->post('SUBMIT_TYPE') != 'auto' && !$_SESSION['import_from_csv'])
+        if ((isset($_POST['saveNcreate']) || isset($_POST['saveNclose'])) && $this->Input->post('FORM_SUBMIT') == 'tl_import_from_csv' && $this->Input->post('SUBMIT_TYPE') != 'auto' && !$_SESSION['import_from_csv'])
         {
-            unset($_POST['saveNcreate']);
-            $this->initImport();
+
+            $blnTestMode = false;
+            if(isset($_POST['saveNcreate']))
+            {
+                unset($_POST['saveNcreate']);
+            }
+
+            if(isset($_POST['saveNclose']))
+            {
+
+                $blnTestMode = true;
+                unset($_POST['saveNclose']);
+            }
+            $this->initImport($blnTestMode);
         }
     }
 
@@ -171,9 +183,9 @@ class tl_import_from_csv extends Backend
 
 
     /**
-     * init import
+     * @param $blnTestMode
      */
-    private function initImport()
+    private function initImport($blnTestMode)
     {
 
         $strTable = $this->Input->post('import_table');
@@ -190,7 +202,7 @@ class tl_import_from_csv extends Backend
             if (strtolower($objFile->extension) == 'csv')
             {
                 $objImport = new MCupic\ImportFromCsv\ImportFromCsv;
-                $objImport->importCsv($objFile, $strTable, $importMode, $arrSelectedFields, $strFieldseparator, $strFieldenclosure, 'id', '||');
+                $objImport->importCsv($objFile, $strTable, $importMode, $arrSelectedFields, $strFieldseparator, $strFieldenclosure, '||', $blnTestMode);
             }
         }
     }
@@ -206,13 +218,13 @@ class tl_import_from_csv extends Backend
         return '
 <div class="manual">
     <label><h2>Erklärungen</h2></label>
-    <figure class="image_container"><img src="../system/modules/import_from_csv/assets/manual.jpg" title="ms-excel" style="width:100%" alt="manual"></figure>
+    <figure class="image_container"><img src="system/modules/import_from_csv/assets/manual.jpg" title="ms-excel" style="width:100%" alt="manual"></figure>
     <p class="tl_help">CSV erstellt mit Tabellenkalkulationsprogramm (MS-Excel o.ä.)</p>
 <br>
-    <figure class="image_container"><img src="../system/modules/import_from_csv/assets/manual2.jpg" title="text-editor" style="width:100%" alt="manual"></figure>
+    <figure class="image_container"><img src="system/modules/import_from_csv/assets/manual2.jpg" title="text-editor" style="width:100%" alt="manual"></figure>
     <p class="tl_help">CSV erstellt mit einfachem Texteditor</p>
 <br>
-    <p class="tl_help">Legen Sie mit Excel oder einem Texteditor ihrer Wahl eine Kommaseparierte Textdatei an (csv). In die erste Zeile schreiben Sie die korrekten Feldnamen. Die einzelnen Felder sollten durch ein Trennzeichen, üblicherweise das Semikolon ";", abgegrenzt werden. Feldinhalt, der in der Datenbank als serialisiertes Array abgelegt wird (z.B. Gruppenzugehörigkeiten), muss durch zwei aufeinanderfolgende pipe-Zeichen abgegrenzt werden "||". Feldbegrenzer und Feldtrennzeichen können individuell festgelegt werden. Wichtig! Beginnen Sie jeden Datensatz mit einer neuen Zeile. Keine Zeilenumbrüche im Datensatz.<br>Laden Sie die erstellte csv-Datei auf den Server. Anschliessend starten Sie den Importvorgang mit einem Klick auf den grossen Button.</p>
+    <p class="tl_help">Legen Sie mit Excel oder einem Texteditor Ihrer Wahl eine kommaseparierte Textdatei an (csv). In die erste Zeile schreiben Sie die korrekten Feldnamen. Die einzelnen Felder sollten durch ein Trennzeichen, üblicherweise das Semikolon ";", abgegrenzt werden. Feldinhalt, der in der Datenbank als serialisiertes Array abgelegt wird (z.B. Gruppenzugehörigkeiten), muss durch zwei aufeinanderfolgende pipe-Zeichen abgegrenzt werden z.B. "2||5". Feldbegrenzer und Feldtrennzeichen können individuell festgelegt werden. Wichtig! Beginnen Sie jeden Datensatz mit einer neuen Zeile. Keine Zeilenumbrüche im Datensatz.<br>Laden Sie die erstellte csv-Datei auf den Server. Anschliessend starten Sie den Importvorgang mit einem Klick auf den grossen Button.</p>
     <p class="tl_help">Beim Importvorgang werden die Inhalte auf Gültigkeit überprüft.</p>
     <p class="tl_help">Achtung! Nutzen Sie das Modul nur, wenn Sie sich ihrer Sache sicher sind. Gelöschte Daten können nur wiederhergestellt werden, wenn Sie vorher ein Backup gemacht haben.</p>
 
@@ -223,8 +235,7 @@ class tl_import_from_csv extends Backend
 
 
     /**
-     * field_callback generateExplanationMarkup
-     * @return string
+     * @return string|void
      */
     public function generateFileContent()
     {
@@ -264,11 +275,13 @@ class tl_import_from_csv extends Backend
      */
     public function generateReportMarkup()
     {
-
-        $html = '<h2>Systemmeldung:</h2>';
+        $html = '<!--Import From CSV resume -->';
+        $html .= '<h2>Import&uuml;bersicht:</h2>';
         $rows = $_SESSION['import_from_csv']['status']['rows'];
         $success = $_SESSION['import_from_csv']['status']['success'];
         $errors = $_SESSION['import_from_csv']['status']['errors'];
+        $strTestMode = $_SESSION['import_from_csv']['status']['blnTestMode'] ? 'ON' : 'OFF';
+        $html .= $strTestMode == '0N' ? sprintf('<h3>Testmode: %s</h3><br>', $strTestMode) : '';
 
         $html .= sprintf('<p id="summary"><span>%s: %s</span><br><span class="allOk">%s: %s</span><br><span class="error">%s: %s</span></p>', $GLOBALS['TL_LANG']['tl_import_from_csv']['datarecords'], $rows, $GLOBALS['TL_LANG']['tl_import_from_csv']['successful_inserts'], $success, $GLOBALS['TL_LANG']['tl_import_from_csv']['failed_inserts'], $errors);
 
@@ -335,6 +348,7 @@ class tl_import_from_csv extends Backend
     }
 
 
+
     /**
      * Parse Backend Template Hook
      * @param string
@@ -348,7 +362,11 @@ class tl_import_from_csv extends Backend
         {
             // Remove saveNClose button
             // Contao 3
-            $strContent = preg_replace('/<input type=\"submit\" name=\"saveNclose\"((\r|\n|.)+?)>/', '', $strContent);
+            // The saveNclose butto acts as the test-mode button
+            $strContent = preg_replace('/<input type=\"submit\" name=\"saveNclose\"((\r|\n|.)+?)>/', '<input type="submit" name="saveNclose" id="saveNclose" class="tl_submit" accesskey="c" value="' . $GLOBALS['TL_LANG']['tl_import_from_csv']['testRunImportButton'] . '">', $strContent);
+            if(strpos($strContent, '<!--Import From CSV resume -->')){
+                $strContent = preg_replace('/<input type=\"submit\" name=\"saveNclose\"((\r|\n|.)+?)>/', '', $strContent);
+            }
             // Contao 4
             $strContent = preg_replace('/<button type=\"submit\" name=\"saveNclose\"((\r|\n|.)+?)>((\r|\n|.)+?)button>/', '', $strContent);
 

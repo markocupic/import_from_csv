@@ -5,7 +5,7 @@
  * Copyright (C) 2005-2012 Leo Feyer
  *
  * @package import_from_csv
- * @author Marko Cupic 2014, extension sponsered by Rainer-Maria Fritsch - Fast-Doc UG, Berlin
+ * @author Marko Cupic 2017, extension sponsered by Rainer-Maria Fritsch - Fast-Doc UG, Berlin
  * @link https://github.com/markocupic/import_from_csv
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
  */
@@ -41,21 +41,28 @@ class ImportFromCsv extends \Backend
      * @param null $arrSelectedFields
      * @param string $strFieldseparator
      * @param string $strFieldenclosure
-     * @param string $strPrimaryKey
      * @param string $arrDelim
+     * @throws \Exception
      */
-    public function importCsv(\File $objCsvFile, $strTable, $strImportMode, $arrSelectedFields = null, $strFieldseparator = ';', $strFieldenclosure = '', $strPrimaryKey = 'id', $arrDelim = '||')
+    public function importCsv(\File $objCsvFile, $strTable, $strImportMode, $arrSelectedFields = null, $strFieldseparator = ';', $strFieldenclosure = '', $arrDelim = '||', $blnTestMode=false)
     {
-        // store sucess or failure message in the session
+        // Get the primary key
+        $strPrimaryKey = $this->getPrimaryKey($strTable);
+        if ($strPrimaryKey === null)
+        {
+            throw new \Exception('No primary key found in ' . $strTable);
+        }
+
+        // Store sucess or failure message in the session
         $_SESSION['import_from_csv']['report'] = array();
 
-        // load language file
+        // Load language file
         \System::loadLanguageFile($strTable);
 
-        // load dca
+        // Load dca
         $this->loadDataContainer($strTable);
 
-        // store the options in $this->arrData
+        // Store the options in $this->arrData
         $this->arrData = array(
             'tablename'      => $strTable,
             'primaryKey'     => $strPrimaryKey,
@@ -65,7 +72,7 @@ class ImportFromCsv extends \Backend
             'fieldEnclosure' => $strFieldenclosure,
         );
 
-        // truncate table
+        // Truncate table
         if ($this->arrData['importMode'] == 'truncate_table')
         {
             $this->Database->execute('TRUNCATE TABLE `' . $strTable . '`');
@@ -76,34 +83,37 @@ class ImportFromCsv extends \Backend
             return;
         }
 
-        // get content as array
+        // Get content as array
         $arrFileContent = $objCsvFile->getContentAsArray();
         $arrFieldnames = explode($this->arrData['fieldSeparator'], $arrFileContent[0]);
 
-        // trim quotes in the first line and get the fieldnames
-        $arrFieldnames = array_map(array($this, 'myTrim'), $arrFieldnames);
+        // Trim quotes in the first line and get the fieldnames
+        $arrFieldnames = array_map(function ($strFieldname)
+        {
+            return trim($strFieldname, $this->arrData['fieldEnclosure']);
+        }, $arrFieldnames);
 
-        // count rows
+        // Count rows
         $rows = 0;
 
-        // count errors
+        // Count errors
         $insertError = 0;
 
-        // store each line as an entry in the db
+        // Store each line as an entry in the db
         foreach ($arrFileContent as $line => $lineContent)
         {
             $doNotSave = false;
 
-            // line 0 contains the fieldnames
+            // Line 0 contains the fieldnames
             if ($line == 0)
             {
                 continue;
             }
 
-            // count rows
+            // Count rows
             $rows++;
 
-            // separate the line into the different fields
+            // Separate the line into the different fields
             $arrLine = explode($this->arrData['fieldSeparator'], $lineContent);
 
             // Set the associative Array with the line content
@@ -119,35 +129,33 @@ class ImportFromCsv extends \Backend
 
                 $blnCustomValidation = false;
 
-                // continue if field is excluded from import
+                // Continue if field is excluded from import
                 if (!in_array($fieldname, $this->arrData['selectedFields']))
                 {
                     continue;
                 }
 
-                // if entries are appended autoincrement id
-                if ($this->arrData['importMode'] == 'append_entries' && strtolower($fieldname) == $this->arrData['primaryKey'])
+                // If entries are appended autoincrement id
+                if ($this->arrData['importMode'] == 'append_entries' && strtolower($fieldname) == strtolower($this->arrData['primaryKey']))
                 {
                     continue;
                 }
 
-                // get the field content
+                // Get the field content
                 $fieldValue = $arrLine[$k];
 
+                // Trim quotes
+                $fieldValue = trim($fieldValue, $this->arrData['fieldEnclosure']);
 
-                // trim quotes
-                $fieldValue = $this->myTrim($fieldValue);
-
-                // convert variable to a string (see #2)
+                // Convert variable to a string
                 $fieldValue = strval($fieldValue);
 
-                // get the DCA of the current field
+                // Get the DCA of the current field
                 $arrDCA =  &$GLOBALS['TL_DCA'][$strTable]['fields'][$fieldname];
                 $arrDCA = is_array($arrDCA) ? $arrDCA : array();
 
-                // Prepare FormWidget object !set inputType to "text" if there is no definition
+                // Prepare FormWidget object set inputType to "text" if there is no definition
                 $inputType = $arrDCA['inputType'] != '' ? $arrDCA['inputType'] : 'text';
-
 
                 // Map checkboxWizards to regular checkbox widgets
                 if ($inputType == 'checkboxWizard')
@@ -181,7 +189,7 @@ class ImportFromCsv extends \Backend
                         $arrCustomValidation = $this->{$callback[0]}->{$callback[1]}($arrCustomValidation, $this);
                         if (!is_array($arrCustomValidation))
                         {
-                            die('Als Rückgabewert wird ein Array erwartet. Fehler in ' . __FILE__ . ' in Zeile ' . __LINE__ . '.');
+                            throw new \Exception('Expected array as return value.');
                         }
                         $fieldValue = $arrCustomValidation['value'];
 
@@ -206,7 +214,7 @@ class ImportFromCsv extends \Backend
 
                 // Continue if the class does not exist
                 // Use form widgets for input validation
-                if (class_exists($strClass) && $blnCustomValidation === false)
+                if (class_exists($strClass) && $blnCustomValidation !== true)
                 {
                     $objWidget = new $strClass($strClass::getAttributesFromDca($arrDCA, $fieldname, $fieldValue, '', '', $this));
                     $objWidget->storeValues = false;
@@ -218,7 +226,7 @@ class ImportFromCsv extends \Backend
                         \Input::setPost('password_confirm', $fieldValue);
                     }
 
-                    // add option values in the csv like this: value1||value2||value3
+                    // Add option values in the csv like this: value1||value2||value3
                     if ($inputType == 'radio' || $inputType == 'checkbox' || $inputType == 'select')
                     {
                         if ($arrDCA['eval']['multiple'] === true)
@@ -238,7 +246,7 @@ class ImportFromCsv extends \Backend
                         }
                     }
 
-                    // validate input
+                    // Validate input
                     $objWidget->validate();
 
 
@@ -285,10 +293,10 @@ class ImportFromCsv extends \Backend
             }
 
 
-            // insert data record
+            // Insert data record
             if (!$doNotSave)
             {
-                // insert tstamp
+                // Insert tstamp
                 if ($this->Database->fieldExists('tstamp', $strTable))
                 {
                     if (!$set['tstamp'] > 0)
@@ -297,7 +305,7 @@ class ImportFromCsv extends \Backend
                     }
                 }
 
-                // insert dateAdded (tl_member)
+                // Insert dateAdded (tl_member)
                 if ($this->Database->fieldExists('dateAdded', $strTable))
                 {
                     if (!$set['dateAdded'] > 0)
@@ -306,12 +314,12 @@ class ImportFromCsv extends \Backend
                     }
                 }
 
-                // add new member to newsletter recipient list
+                // Add new member to newsletter recipient list
                 if ($strTable == 'tl_member' && $set['email'] != '' && $set['newsletter'] != '')
                 {
                     foreach (deserialize($set['newsletter'], true) as $newsletterId)
                     {
-                        // check for unique email-address
+                        // Check for unique email-address
                         $objRecipient = $this->Database->prepare("SELECT * FROM tl_newsletter_recipients WHERE email=? AND pid=(SELECT pid FROM tl_newsletter_recipients WHERE id=?) AND id!=?")->execute($set['email'], $newsletterId, $newsletterId);
 
                         if (!$objRecipient->numRows)
@@ -321,15 +329,21 @@ class ImportFromCsv extends \Backend
                             $arrRecipient['pid'] = $newsletterId;
                             $arrRecipient['email'] = $set['email'];
                             $arrRecipient['active'] = '1';
-                            $this->Database->prepare('INSERT INTO tl_newsletter_recipients %s')->set($arrRecipient)->execute();
+                            if ($blnTestMode !== true)
+                            {
+                                $this->Database->prepare('INSERT INTO tl_newsletter_recipients %s')->set($arrRecipient)->execute();
+                            }
                         }
                     }
                 }
 
                 try
                 {
-                    // insert entry into database
-                    $this->Database->prepare('INSERT INTO ' . $strTable . ' %s')->set($set)->execute();
+                    if ($blnTestMode !== true)
+                    {
+                        // Insert entry into database
+                        $this->Database->prepare('INSERT INTO ' . $strTable . ' %s')->set($set)->execute();
+                    }
                 } catch (\Exception $e)
                 {
                     $set['insertError'] = $e->getMessage();
@@ -337,7 +351,7 @@ class ImportFromCsv extends \Backend
                 }
             }
 
-            // generate html markup for the import report table
+            // Generate html markup for the import report table
             $htmlReport = '';
             $cssClass = 'allOk';
             if ($doNotSave)
@@ -345,7 +359,7 @@ class ImportFromCsv extends \Backend
                 $cssClass = 'error';
                 $htmlReport .= sprintf('<tr class="%s"><td class="tdTitle" colspan="2">#%s Datensatz konnte nicht angelegt werden!</td></tr>', $cssClass, $line);
 
-                // increment error counter if necessary
+                // Increment error counter if necessary
                 $insertError++;
             }
             else
@@ -368,19 +382,28 @@ class ImportFromCsv extends \Backend
         }
 
         $_SESSION['import_from_csv']['status'] = array(
+            'blnTestMode' => $blnTestMode,
             'rows'    => $rows,
             'success' => $rows - $insertError,
-            'errors'  => $insertError,
+            'errors'  => $insertError
         );
     }
 
 
     /**
-     * @param string
-     * @return string
+     * @param $strTable
+     * @return mixed|null
      */
-    private function myTrim($strFieldname)
+    private function getPrimaryKey($strTable)
     {
-        return trim($strFieldname, $this->arrData['fieldEnclosure']);
+        $objDb = \Database::getInstance()->execute("SHOW INDEX FROM " . $strTable . " WHERE Key_name = 'PRIMARY'");
+        if ($objDb->numRows)
+        {
+            if ($objDb->Column_name != '')
+            {
+                return $objDb->Column_name;
+            }
+        }
+        return null;
     }
 }
