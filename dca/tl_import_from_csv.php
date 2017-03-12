@@ -275,8 +275,7 @@ class tl_import_from_csv extends Backend
      */
     public function generateReportMarkup()
     {
-        $html = '<!--Import From CSV resume -->';
-        $html .= '<h2>Import&uuml;bersicht:</h2>';
+        $html = '<h2>Import&uuml;bersicht:</h2>';
         $rows = $_SESSION['import_from_csv']['status']['rows'];
         $success = $_SESSION['import_from_csv']['status']['success'];
         $errors = $_SESSION['import_from_csv']['status']['errors'];
@@ -364,9 +363,7 @@ class tl_import_from_csv extends Backend
             // Contao 3
             // The saveNclose butto acts as the test-mode button
             $strContent = preg_replace('/<input type=\"submit\" name=\"saveNclose\"((\r|\n|.)+?)>/', '<input type="submit" name="saveNclose" id="saveNclose" class="tl_submit" accesskey="c" value="' . $GLOBALS['TL_LANG']['tl_import_from_csv']['testRunImportButton'] . '">', $strContent);
-            if(strpos($strContent, '<!--Import From CSV resume -->')){
-                $strContent = preg_replace('/<input type=\"submit\" name=\"saveNclose\"((\r|\n|.)+?)>/', '', $strContent);
-            }
+
             // Contao 4
             $strContent = preg_replace('/<button type=\"submit\" name=\"saveNclose\"((\r|\n|.)+?)>((\r|\n|.)+?)button>/', '', $strContent);
 
@@ -382,10 +379,14 @@ class tl_import_from_csv extends Backend
                 // Contao 3
                 $strContent = preg_replace('/<input type=\"submit\" name=\"save\"((\r|\n|.)+?)>/', '', $strContent);
                 $strContent = preg_replace('/<input type=\"submit\" name=\"saveNcreate\"((\r|\n|.)+?)>/', '', $strContent);
+                $strContent = preg_replace('/<input type=\"submit\" name=\"saveNclose\"((\r|\n|.)+?)>/', '', $strContent);
+
 
                 // Contao 4
                 $strContent = preg_replace('/<button type=\"submit\" name=\"save\"((\r|\n|.)+?)button>/', '', $strContent);
                 $strContent = preg_replace('/<button type=\"submit\" name=\"saveNcreate\"((\r|\n|.)+?)button>/', '', $strContent);
+                $strContent = preg_replace('/<button type=\"submit\" name=\"saveNclose\"((\r|\n|.)+?)button>/', '', $strContent);
+
             }
         }
 
